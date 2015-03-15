@@ -3,6 +3,11 @@ echo "Running .bashrc ..."
 echo "Shell evnironment setting ..."
 echo ""
 
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
