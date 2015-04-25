@@ -17,10 +17,6 @@ set cdpath=(~)      	# easy convenient path search & change
 set localdis= $DISPLAY
 set pcdis= ""
 
-if ($?VNCDESKTOP) then
-setenv DISPLAY  $VNCDESKTOP":01"
-endif
-
 set path = (/bin /usr/bin /usr/etc /etc .)
 
 if ( $?prompt ) then 

@@ -1,0 +1,43 @@
+#! /bin/bash -f
+## +FHDR-----------------------------------------------------------------------
+## Copyright (c) 2013-2015 Hsin-Hsien Yeh (Edward Yeh). All rights reserved.
+## Filename        : svn_rename
+## Version         : $Revision: $
+## Last Modified On: $Date: $
+## Last Modified By: $Author: $
+##                   
+## File Description: Batch rename function for SVN
+## ----------------------------------------------------------------------------
+## Reuse Issues    : 
+## Parameter       : 
+##                   
+## Abbreviations   : 
+## Release History : 
+## ----------------------------------------------------------------------------
+## Author          : Edward Yeh
+## Created On      : Sun Apr 26 03:43:01 CST 2015
+## Format          : 
+## ----------------------------------------------------------------------------
+## $Log: svn_rename,v $
+## -FHDR-----------------------------------------------------------------------
+
+if [ "$#" -lt 3 ]; then
+    echo "svn_rename: Batch rename function for SVN                              "
+    echo "Usage:                                                                 "
+    echo "        svn_rename <source_string> <target_string> files               "
+    echo "                                                                       "
+    echo "  source_string       String in the filenames which want to be repplace"
+    echo "  target_string       String to replace the source string in filenames "
+    echo "                                                                       "
+    exit
+fi
+
+for (( fid=3; fid<="$#"; fid=fid+1 ))
+do
+    eval argv=\$$fid
+    src_fn=$(echo $argv | grep $1)
+    if [ -n "$src_fn" ]; then
+        dst_fn=$(echo $src_en | sed "s/$1/$2/g")
+        svn mv $src_fn $dst_fn
+    fi
+done

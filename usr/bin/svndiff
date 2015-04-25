@@ -1,0 +1,32 @@
+#! /bin/bash -f
+## +FHDR-----------------------------------------------------------------------
+## Copyright (c) 2013-2015 Hsin-Hsien Yeh (Edward Yeh). All rights reserved.
+## Filename        : svndiff
+## Version         : $Revision: $
+## Last Modified On: $Date: $
+## Last Modified By: $Author: $
+##                   
+## File Description: Script for SVN diff by external diff tool
+## ----------------------------------------------------------------------------
+## Reuse Issues    : 
+## Parameter       : 
+##                   
+## Abbreviations   : 
+## Release History : 
+## ----------------------------------------------------------------------------
+## Author          : Edward Yeh
+## Created On      : Sun Apr 26 03:21:30 CST 2015
+## Format          : 
+## ----------------------------------------------------------------------------
+## $Log: svndiff,v $
+## -FHDR-----------------------------------------------------------------------
+
+# Persional diff tool
+DIFF="gvimdiff"
+
+#SVN diff arguments
+LEFT="$6"
+RIGHT="$7"
+
+# External SVN diff command
+$DIFF $LEFT $RIGHT

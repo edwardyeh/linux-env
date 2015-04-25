@@ -1,0 +1,42 @@
+#! /bin/bash -f
+## +FHDR-----------------------------------------------------------------------
+## Copyright (c) 2013-2015 Hsin-Hsien Yeh (Edward Yeh). All rights reserved.
+## Filename        : svn_batch_exclude
+## Version         : $Revision: $
+## Last Modified On: $Date: $
+## Last Modified By: $Author: $
+##                   
+## File Description: SVN repository reduce
+## ----------------------------------------------------------------------------
+## Reuse Issues    : 
+## Parameter       : 
+##                   
+## Abbreviations   : 
+## Release History : 
+## ----------------------------------------------------------------------------
+## Author          : Edward Yeh
+## Created On      : Sun Apr 26 03:25:38 CST 2015
+## Format          : 
+## ----------------------------------------------------------------------------
+## $Log: svn_batch_exclude,v $
+## -FHDR-----------------------------------------------------------------------
+
+if [ "$#" -lt 3 ]; then
+    echo "svn_batch_exclude: Batch exclude file for svndumpfilter             "
+    echo "Usage:                                                              "
+    echo "        svn_batch_exclude <source_dump> <target_dump> <exclude node>"
+    echo "                                                                    "
+    exit
+fi
+
+exclude_node=
+
+for (( fid=3; fid<="$#";  fid=fid+1 ))
+do
+    eval node=\${${fid}}
+    exclude_node+="$node"
+done
+
+cat $1 | svndumpfilter exclude $exclude_nodes > $2
+
+for 

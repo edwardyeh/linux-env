@@ -4,7 +4,7 @@ passportname="Hsin-Hsien Yeh"
 author="Edward Yeh"
 year=$(date +%Y)
 times=$(date)
-type=""
+type=
 
 if [ "$#" -lt 2 ]; then
     echo "Usage: touchh <format> <filename>"
@@ -16,6 +16,7 @@ if [ "$#" -lt 2 ]; then
     echo "           cs  -- C shell script"
     echo "           bs  -- Bash shell script"
     echo "           t   -- Verilog testbench"
+    echo ""
     exit
 fi
 

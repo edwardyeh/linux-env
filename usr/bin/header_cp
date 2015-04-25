@@ -1,0 +1,131 @@
+#! /bin/bash -f
+## +FHDR-----------------------------------------------------------------------
+## Copyright (c) 2013-2015 Hsin-Hsien Yeh (Edward Yeh). All rights reserved.
+## Filename        : header_cp
+## Version         : $Revision: $
+## Last Modified On: $Date: $
+## Last Modified By: $Author: $
+##                   
+## File Description: Header copy
+## ----------------------------------------------------------------------------
+## Reuse Issues    : 
+## Parameter       : 
+##                   
+## Abbreviations   : 
+## Release History : 
+## ----------------------------------------------------------------------------
+## Author          : Edward Yeh
+## Created On      : Sun Apr 26 04:32:34 CST 2015
+## Format          : 
+## ----------------------------------------------------------------------------
+## $Log: header_cp,v $
+## -FHDR-----------------------------------------------------------------------
+
+if [ "$#" -lt 2 ]; then
+    echo "header_cp: Header copy and replace                                   "
+    echo "Usage:                                                               "
+    echo "        header_cp <source file/folder> <target file/folder> [flatten]"
+    echo "                                                                     "
+    echo "  flatten     compare file after flattening directory                "
+    echo "                                                                     "
+    exit
+fi
+
+if [ -d "$1" -a -d "$2" ]; then     # Direction copy
+    cd $1
+    src_fl=$(find \( -path "*/.svn" -o -path "*/CVS" -o -path "*/.git" \) -prune -o -type f -print)
+    cd -
+
+    cd $2
+    dst_fl=$(find \( -path "*/.svn" -o -path "*/CVS" -o -path "*/.git" \) -prune -o -type f -print)
+    cd -
+
+    for dst_file in $dst_fl; do
+        is_chg=0
+        for src_file in $src_fl; do
+            file_eq=0
+            if [ "$#" -ge 3 -a $3 == '1' ]; then
+                src_fn=$(echo $src_file | sed 's/^.*\/\(.*$\)/\1/g')
+                dst_fn=$(echo $dst_file | sed 's/^.*\/\(.*$\)/\1/g')
+                if [ "$src_fn" == "$dst_fn" ]; then
+                    file_eq=1
+                else
+                    file_eq=0
+                fi
+            else
+                if [ "$src_file" == "$dst_file" ]; then
+                    file_eq=1
+                else
+                    file_eq=0
+                fi
+            fi
+            
+            if [ "$file_eq" -eq 1 ]; then
+                echo "Header replace:"
+                echo "$src_file ->   "
+                echo "$dst_file      "
+                echo "               "
+
+                # Get source header
+                head_st_ln=$(cat -n $1/$src_file | grep "+FHDR" | awk '{print $1}')
+                head_ed_ln=$(cat -n $1/$src_file | grep "\-FHDR" | awk '{print $1}')
+
+                if [ -n "$head_st_ln" -a -n "$head_ed_ln" ]; then
+                    sed -n "${head_st_ln},${head_ed_ln}p" $1/$src_file > tmpfile
+
+                    # Delete target header
+                    head_st_ln=$(cat -n $2/$dst_file | grep "+FHDR" | awk '{print $1}')
+                    head_ed_ln=$(cat -n $2/$dst_file | grep "\-FHDR" | awk '{print $1}')
+
+                    if [ -n "$head_st_ln" -a -n "$head_ed_ln" ]; then
+                        sed -i "${head_st_ln},${head_ed_ln}d" $2/$dst_file
+                    fi
+
+                    cat $2/$dst_file >> tmpfile
+                    mv tmpfile $2/$dst_file
+                fi
+                is_chg=1
+                break
+            fi
+        done
+
+        if [ "$is_chg" == "0" ]; then
+            echo "Header unchange: $dst_file"
+            echo ""
+        fi
+    done
+elif [ -f $1 -a -f $2 ]; then   # File copy
+    echo "Header replace:"
+    echo "$1 ->          "
+    echo "$2             "
+    echo "               "
+
+    # Get source header
+    head_st_ln=$(cat -n $1 | grep "+FHDR" | awk '{print $1}')
+    head_ed_ln=$(cat -n $1 | grep "\-FHDR" | awk '{print $1}')
+
+    if [ -n "$head_st_ln" -a -n "$head_ed_ln" ]; then
+        sed -n "${head_st_ln},${head_ed_ln}p" $1 > tmpfile
+
+        # Delete target header
+        head_st_ln=$(cat -n $2 | grep "+FHDR" | awk '{print $1}')
+        head_ed_ln=$(cat -n $2 | grep "\-FHDR" | awk '{print $1}')
+
+        if [ -n "$head_st_ln" -a -n "$head_ed_ln" ]; then
+            sed -i "${head_st_ln},${head_ed_ln}d" $2
+        fi
+
+        cat $2 >> tmpfile
+        mv tmpfile $2
+    fi
+    is_chg=1
+    break
+else
+    echo "header_cp: Header copy and replace                                   "
+    echo "Usage:                                                               "
+    echo "        header_cp <source file/folder> <target file/folder> [flatten]"
+    echo "                                                                     "
+    echo "  flatten     compare file after flattening directory                "
+    echo "                                                                     "
+    exit
+fi
