@@ -19,10 +19,6 @@ HISTFILESIZE=100        # save history when logout
 localdis=$DISPLAY
 pcdis=""
 
-if [ -n "$VNCDESKTOP" ]; then
-    export DISPLAY=$VNCDESKTOP":01"
-fi
-
 stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
 stty sane
 
@@ -45,7 +41,7 @@ cdexpr='.*/\(.*/.*\)$'
 cdcwd=`expr "$PWD" : "$cdexpr"`
 #PS1="`hostname`:<$cdcwd>[\!] "
 #PS1="`hostname`> "
-PS1="\033[1;31m$HOSTNAME:<$cdcwd>\033[0m "
+PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "
 
 ## ------------------------------------------------------
 #    Job alias
@@ -54,7 +50,7 @@ PS1="\033[1;31m$HOSTNAME:<$cdcwd>\033[0m "
 ## ------------------------------------------------------
 #    User alias
 ## ------------------------------------------------------
-alias cd='function __cd_func { cd $*; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\033[1;31m$HOSTNAME:<$cdcwd>\033[0m "; }; __cd_func'
+alias cd='function __cd_func { cd $*; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; __cd_func'
 alias c='clear'
 alias h='history'
 alias ls='function __ls_func { ls -F $* --color=always; }; __ls_func'
