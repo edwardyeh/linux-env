@@ -1,0 +1,46 @@
+#! /bin/bash -f 
+
+filename=""
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: header_add <file list>"
+    echo ""
+    echo "  format:  c   -- C/C++"
+    echo "           h   -- Header file"
+    echo "           v   -- Verilog"
+    echo "           f   -- Verilog file list"
+    echo "           cs  -- C shell script"
+    echo "           bs  -- Bash shell script"
+    echo "           t   -- Verilog testbench"
+    exit
+fi
+
+if [ "$1" != "c" -a "$1" != "h" -a "$1" != "v" -a "$1" != "f" -a "$1" != "cs" -a "$1" != "bs" -a "$1" != "t" ]; then
+    echo "Usage: header_add <file list>"
+    echo ""
+    echo "  format:  c   -- C/C++"
+    echo "           h   -- Header file"
+    echo "           v   -- Verilog"
+    echo "           f   -- Verilog file list"
+    echo "           cs  -- C shell script"
+    echo "           bs  -- Bash shell script"
+    echo "           t   -- Verilog testbench"
+    exit
+fi
+
+for i in $(seq 2 1 $#); do
+    eval filename=$(echo \${${i}})
+    if [ "$1" == "bs" -o "$1" == "cs" ]; then
+        sed -n '1p' $filename   >  tmp.file
+        header_gen $1 $filename >> tmp.file
+        sed -n '2,$p' $filename >> tmp.file
+    else
+        header_gen $1 $filename > tmp.file
+        cat $filename >> tmp.file
+    fi
+
+    mv tmp.file $filename
+done
+
+
+

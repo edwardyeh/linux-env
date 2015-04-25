@@ -1,0 +1,20 @@
+#! /bin/bash -f 
+
+head_st_ln=0
+head_ed_ln=0
+filename=""
+
+if [ "$#" -eq 0 ]; then
+    echo "Usage:  header_del <file list>"
+    exit
+fi
+
+for i in $(seq 1 1 $#); do
+    eval filename=$(echo \${${i}})
+    head_st_ln=$(nl $filename | grep '+FHDR' | awk '{print $1}')
+    head_ed_ln=$(nl $filename | grep '\-FHDR' | awk '{print $1}')
+
+    if [ "$head_st_ln" != "" -a "$head_ed_ln" != "" ]; then
+        sed -i "${head_st_ln},${head_ed_ln}d" $filename
+    fi
+done

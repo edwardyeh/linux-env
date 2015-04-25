@@ -1,0 +1,158 @@
+#! /bin/bash -f
+
+passportname="Hsin-Hsien Yeh"
+author="Edward Yeh"
+year=$(date +%Y)
+times=$(date)
+type=""
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: touchh <format> <filename>"
+    echo ""
+    echo "  format:  c   -- C/C++"
+    echo "           h   -- Header file"
+    echo "           v   -- Verilog"
+    echo "           f   -- Verilog file list"
+    echo "           cs  -- C shell script"
+    echo "           bs  -- Bash shell script"
+    echo "           t   -- Verilog testbench"
+    exit
+fi
+
+if [ "$1" == "c" -o "$1" == "h" ]; then
+    echo '// +FHDR-----------------------------------------------------------------------'   
+    echo "// Copyright (c) 2013-$year $passportname ($author). All rights reserved."        
+    echo "// Filename        : $2"                                                          
+    echo '// Version         : $Revision: $'                                                
+    echo '// Last Modified On: $Date: $'                                                    
+    echo '// Last Modified By: $Author: $'                                                  
+    echo '//                   '                                                            
+    echo '// File Description: '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// Reuse Issues    : '                                                            
+    echo '// Parameters      : '                                                            
+    echo '//                   '                                                            
+    echo '// Abbreviations   : '                                                            
+    echo '// Release History : '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo "// Author          : $author"                                                     
+    echo "// Created On      : $times"                                                      
+    echo "// Format          : $type"                                                       
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// $Log: '$2',v $'                                                                
+    echo '// -FHDR-----------------------------------------------------------------------'   
+    echo ''
+
+elif [ "$1" == "v" ]; then
+    module_name=$(echo $2 | sed 's/\.v//g')
+    echo '// +FHDR-----------------------------------------------------------------------'   
+    echo "// Copyright (c) 2013-$year $passportname ($author). All rights reserved."        
+    echo "// Filename        : $2"                                                          
+    echo '// Version         : $Revision: $'                                                
+    echo '// Last Modified On: $Date: $'                                                    
+    echo '// Last Modified By: $Author: $'                                                  
+    echo '//                   '                                                            
+    echo '// File Description: '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// Reuse Issues    : '                                                            
+    echo '// Parameters      : '                                                            
+    echo '// Reset Strategy  : '                                                            
+    echo '// Clock Domain    : '                                                            
+    echo '//                   '                                                            
+    echo '// Abbreviations   : '                                                            
+    echo '// Prefix          : c_<var> - current time'                                      
+    echo '//                   n_<var> - next time'                                         
+    echo '// Postfix         : <var>_n - negtive sensitive signal'                          
+    echo '//                   <var>_r - flip-flop'                                         
+    echo '//                   <var>_w - wire drive a flip-flop'                            
+    echo '// Release History : '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo "// Author          : $author"                                                     
+    echo "// Created On      : $times"                                                      
+    echo "// Format          : $type"                                                       
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// $Log: '$2',v $'                                                                
+    echo '// -FHDR-----------------------------------------------------------------------'   
+    echo ''                                                                                 
+
+elif [ "$1" == "t" ]; then
+    module_name=$(echo $2 | sed 's/\.v//g')
+    echo '// +FHDR-----------------------------------------------------------------------'   
+    echo "// Copyright (c) 2013-$year $passportname ($author). All rights reserved."        
+    echo "// Filename        : $2"                                                          
+    echo '// Version         : $Revision: $'                                                
+    echo '// Last Modified On: $Date: $'                                                    
+    echo '// Last Modified By: $Author: $'                                                  
+    echo '//                   '                                                            
+    echo '// File Description: '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// Reuse Issues    : '                                                            
+    echo '// Parameters      : '                                                            
+    echo '// Reset Strategy  : '                                                            
+    echo '// Clock Domain    : '                                                            
+    echo '//                   '                                                            
+    echo '// Abbreviations   : '                                                            
+    echo '// Prefix          : c_<var> - current time'                                      
+    echo '//                   n_<var> - next time'                                         
+    echo '// Postfix         : <var>_n - negtive sensitive signal'                          
+    echo '//                   <var>_r - flip-flop'                                         
+    echo '//                   <var>_w - wire drive a flip-flop'                            
+    echo '// Release History : '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo "// Author          : $author"                                                     
+    echo "// Created On      : $times"                                                      
+    echo "// Format          : $type"                                                       
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// $Log: '$2',v $'                                                                
+    echo '// -FHDR-----------------------------------------------------------------------'   
+    echo ''                                                                                 
+
+elif [ "$1" == "f" ]; then
+    echo '// +FHDR-----------------------------------------------------------------------'   
+    echo "// Copyright (c) 2013-$year $passportname ($author). All rights reserved."        
+    echo "// Filename        : $2"                                                          
+    echo '// Version         : $Revision: $'                                                
+    echo '// Last Modified On: $Date: $'                                                    
+    echo '// Last Modified By: $Author: $'                                                  
+    echo '//                   '                                                            
+    echo '// File Description: '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// Reuse Issues    : '                                                            
+    echo '//                   '                                                            
+    echo '// Abbreviations   : '                                                            
+    echo '// Release History : '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo "// Author          : $author"                                                     
+    echo "// Created On      : $times"                                                      
+    echo "// Format          : $type"                                                       
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// $Log: '$2',v $'                                                                
+    echo '// -FHDR-----------------------------------------------------------------------'   
+    echo ''                                                                                 
+
+elif [ "$1" == "bs" -o "$1" == "cs" ]; then
+    echo '// +FHDR-----------------------------------------------------------------------'   
+    echo "// Copyright (c) 2013-$year $passportname ($author). All rights reserved."        
+    echo "// Filename        : $2"                                                          
+    echo '// Version         : $Revision: $'                                                
+    echo '// Last Modified On: $Date: $'                                                    
+    echo '// Last Modified By: $Author: $'                                                  
+    echo '//                   '                                                            
+    echo '// File Description: '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// Reuse Issues    : '                                                            
+    echo '// Parameter       : '                                                            
+    echo '//                   '                                                            
+    echo '// Abbreviations   : '                                                            
+    echo '// Release History : '                                                            
+    echo '// ----------------------------------------------------------------------------'   
+    echo "// Author          : $author"                                                     
+    echo "// Created On      : $times"                                                      
+    echo "// Format          : $type"                                                       
+    echo '// ----------------------------------------------------------------------------'   
+    echo '// $Log: '$2',v $'                                                                
+    echo '// -FHDR-----------------------------------------------------------------------'   
+    echo ''
+fi
+
+        
