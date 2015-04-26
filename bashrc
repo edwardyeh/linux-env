@@ -31,6 +31,7 @@ export  PATH+=":$HOME/.linux-env/usr/bin"
 export  SVN_DB="$HOME/Datebase/SVN_DB"
 export  SVN_PATH="file://$SVN_DB"
 export  GIT_DB="$HOME/Database/GIT_DB"
+export  WS="$HOME/Workstation"
 
 if [ -z $LD_LIBRARY_PATH ]; then
     export LD_LIBRARY_PATH="/usr/local/lib"
