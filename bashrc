@@ -80,6 +80,7 @@ alias git_del="find -type d -name '.git' | xargs rm -rf"
 alias git_diff='function func { git difftool -t gvimdiff -y $*; }; func'
 alias gd='gvim -d'
 alias acalc='function func { awk "BEGIN{ print $* }"; }; func'
+alias xterm='xterm -fg gray -bg black'
 
 ## ------------------------------------------------------
 #    GhostScript
