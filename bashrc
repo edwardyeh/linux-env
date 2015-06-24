@@ -8,6 +8,10 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+if [ -f ~/.bashrc_org ]; then
+    source ~/.bashrc_org
+fi
+
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
@@ -19,8 +23,8 @@ HISTFILESIZE=100        # save history when logout
 localdis=$DISPLAY
 pcdis=""
 
-stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
-stty sane
+#stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
+#stty sane
 
 ########################################################
 ###        Edward Yeh's environment                  ###
@@ -31,7 +35,7 @@ export  PATH+=":$HOME/.linux-env/usr/bin"
 export  SVN_DB="$HOME/Datebase/SVN_DB"
 export  SVN_PATH="file://$SVN_DB"
 export  GIT_DB="$HOME/Database/GIT_DB"
-export  WS="$HOME/Workstation"
+export  WS="$HOME/Workspace"
 
 if [ -z $LD_LIBRARY_PATH ]; then
     export LD_LIBRARY_PATH="/usr/local/lib"
