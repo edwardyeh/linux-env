@@ -16,6 +16,7 @@ if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
     echo "           cs  -- C shell script   "
     echo "           bs  -- Bash shell script"
     echo "           t   -- Verilog testbench"
+    echo "           d   -- Document         "
     echo ""
     echo "  force_replace: y  -- force replace    "
     echo "                 n  -- process terminate"
@@ -60,6 +61,30 @@ if [ "$1" == "c" -o "$1" == "h" ]; then
     echo '// ----------------------------------------------------------------------------'  >> $2 
     echo '// $Log: '$2',v $'                                                                >> $2
     echo '// -FHDR-----------------------------------------------------------------------'  >> $2 
+    echo '' >> $2
+
+elif [ "$1" == "d"]; then
+    echo '// +FHDR //////////////////////////////////////////////////////////////////////'  >  $2 
+    echo "   Copyright (c) 2013-$year $passportname ($author). All rights reserved."        >> $2
+    echo "   Filename        : $2"                                                          >> $2
+    echo '   Version         : $Revision: $'                                                >> $2
+    echo '   Last Modified On: $Date: $'                                                    >> $2
+    echo '   Last Modified By: $Author: $'                                                  >> $2
+    echo '                     '                                                            >> $2
+    echo '   File Description: '                                                            >> $2
+    echo '   ----------------------------------------------------------------------------'  >> $2 
+    echo '   Reuse Issues    : '                                                            >> $2
+    echo '   Parameters      : '                                                            >> $2
+    echo '                     '                                                            >> $2
+    echo '   Abbreviations   : '                                                            >> $2
+    echo '   Release History : '                                                            >> $2
+    echo '   ----------------------------------------------------------------------------'  >> $2 
+    echo "   Author          : $author"                                                     >> $2
+    echo "   Created On      : $times"                                                      >> $2
+    echo "   Format          : $type"                                                       >> $2
+    echo '   ----------------------------------------------------------------------------'  >> $2 
+    echo '   $Log: '$2',v $'                                                                >> $2
+    echo '// -FHDR //////////////////////////////////////////////////////////////////////'  >> $2 
     echo '' >> $2
 
 elif [ "$1" == "v" ]; then
