@@ -8,6 +8,8 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+source ~/.bashrc_org
+
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
@@ -19,8 +21,8 @@ HISTFILESIZE=100        # save history when logout
 localdis=$DISPLAY
 pcdis=""
 
-stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
-stty sane
+#stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
+#stty sane
 
 ########################################################
 ###        Edward Yeh's environment                  ###
