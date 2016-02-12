@@ -63,7 +63,7 @@ if [ "$1" == "c" -o "$1" == "h" ]; then
     echo '// -FHDR-----------------------------------------------------------------------'  >> $2 
     echo '' >> $2
 
-elif [ "$1" == "d"]; then
+elif [ "$1" == "d" ]; then
     echo '// +FHDR //////////////////////////////////////////////////////////////////////'  >  $2 
     echo "   Copyright (c) 2013-$year $passportname ($author). All rights reserved."        >> $2
     echo "   Filename        : $2"                                                          >> $2
