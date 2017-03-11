@@ -86,8 +86,3 @@ alias gd='gvim -d'
 alias acalc='function func { awk "BEGIN{ print $* }"; }; func'
 alias xterm='xterm -fg gray -bg black'
 
-## ------------------------------------------------------
-#    GhostScript
-## ------------------------------------------------------
-#setenv GS_LIB /usr/public/share/ghostscript/5.01:/usr/public/share/ghostscript/gsfonts:/usr/public/share/ghostscript/other_fonts
-
