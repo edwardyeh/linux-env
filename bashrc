@@ -5,7 +5,7 @@ echo ""
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
-	. /etc/bashrc
+    . /etc/bashrc
 fi
 
 if [ -f ~/.bashrc_org ]; then
@@ -15,10 +15,10 @@ fi
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
-umask 022       		# file permission mask ; rwxr#xr#x
+umask 022               # file permission mask ; rwxr#xr#x
 export TMOUT=3600       # disable auto-logout
 
-HISTSIZE=100    		# history list size
+HISTSIZE=100            # history list size
 HISTFILESIZE=100        # save history when logout
 localdis=$DISPLAY
 pcdis=""
@@ -36,6 +36,16 @@ export  SVN_REPO="$HOME/Repo/SVN"
 export  SVN_PATH="file://$SVN_DB"
 export  GIT_REPO="$HOME/Repo/GIT"
 export  WS="$HOME/Workspace"
+
+#export  LC_ADDRESS="en_US"
+#export  LC_IDENTIFICATION="en_US"
+#export  LC_MEASUREMENT="en_US"
+#export  LC_MONETARY="en_US"
+#export  LC_NAME="en_US"
+#export  LC_NUMERIC="en_US"
+#export  LC_PAPER="en_US"
+#export  LC_TELEPHONE="en_US"
+#export  LC_TIME="en_US"
 
 ## ------------------------------------------------------
 #    Prompt setting
