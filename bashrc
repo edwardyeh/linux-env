@@ -37,12 +37,6 @@ export  SVN_PATH="file://$SVN_DB"
 export  GIT_REPO="$HOME/Repo/GIT"
 export  WS="$HOME/Workspace"
 
-if [ -z $LD_LIBRARY_PATH ]; then
-    export LD_LIBRARY_PATH="/usr/local/lib"
-else
-    export LD_LIBRARY_PATH+=":/usr/local/lib"
-fi
-
 ## ------------------------------------------------------
 #    Prompt setting
 ## ------------------------------------------------------
