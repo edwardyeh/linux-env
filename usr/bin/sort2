@@ -1,0 +1,58 @@
+#! /bin/bash -f
+## +FHDR-----------------------------------------------------------------------
+## Copyright (c) 2017 Hsin-Hsien Yeh (Edward Yeh). All rights reserved.
+## Filename        : sort2
+## File Description: Group sort
+## ----------------------------------------------------------------------------
+## Reuse Issues    : 
+## Abbreviations   : 
+## Release History : 
+## ----------------------------------------------------------------------------
+## Author          : Edward Yeh
+## Created On      : Sun Aug 13 02:36:47 CST 2017
+## Format          : Shell script
+## ----------------------------------------------------------------------------
+## $Log: sort2,v $
+## -FHDR-----------------------------------------------------------------------
+
+function usage () {
+    proc=$(basename $0)
+    echo "Usage: $0 <start> <end> <lv1_type> <lv1_field> <lv2_type> <lv2_field> <src_file> [dst_file]"
+    echo ""
+    echo "  start       Start line number"
+    echo "  end         End line number"
+    echo "  lv1_type    Level 1 compare type (s: string compare, n: number compare)"
+    echo "  lv1_field   Field number for Level 1 compare"
+    echo "  lv2_type    Level 2 compare type (s: string compare, n: number compare)"
+    echo "  lv2_field   Field number for Level 2 compare"
+    echo "  src_file    Source file name"
+    echo "  dst_file    Destination file name"
+    echo ""
+}
+
+if [ "$#" -lt 7 -o "$#" -gt 8 ]; then
+    usage $0
+    exit 1
+fi
+
+st_ln=$1
+ed_ln=$2
+lv1_t="-rk"
+[ "$3" == "n" ] && lv1_t="-rnk"
+lv1_f=$4
+lv2_t="-rk"
+[ "$5" == "n" ] && lv2_t="-rnk"
+lv2_f=$6
+src=$7
+dst=">&1"
+[ "$#" -eq 8 ] && dst=">> $8"
+
+\rm -rf $dst
+
+for k1 in $(sed -n "${st_ln},${ed_ln}p" $src | sort $lv1_t $lv1_f | tee .sort1 | awk '{print $'$lv1_f'}' | uniq); do
+    cat .sort1 | awk '$'$lv1_f'=="'$k1'" {print $0}' | eval sort $lv2_t $lv2_f $dst
+done
+
+\rm -rf .sort1
+
+

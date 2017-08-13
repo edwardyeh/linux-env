@@ -6,165 +6,133 @@ year=$(date +%Y)
 times=$(date)
 title="Copyright (c) $year $passportname ($author). All rights reserved."
 
-if [ "$#" -lt 2 ]; then
-    echo "Usage: touchh <format> <filename>"
+if [ "$#" -lt 2 ] || \
+   [ "$1" != "c" -a "$1" != "h" -a \
+     "$1" != "v" -a "$1" != "t" -a "$1" != "f" -a \
+     "$1" != "cs" -a "$1" != "bs" -a "$1" != d ]; then
+
+    [ "$#" -ge 3 -a "$3" == "-test" ] && exit 1
+
+    prog=$(basename $0)
+
+    if !([ "$#" -ge 1 -a "$1" == "-list" ]) then
+        echo "Usage: $prog <format> <filename>"
+    fi
+
     echo ""
-    echo "  format:  c   -- C/C++"
-    echo "           h   -- Header file"
-    echo "           v   -- Verilog"
-    echo "           f   -- Verilog file list"
-    echo "           cs  -- C shell script"
-    echo "           bs  -- Bash shell script"
+    echo "  format:  c   -- C/C++            "
+    echo "           h   -- Header file      "
+    echo "           v   -- Verilog          "
     echo "           t   -- Verilog testbench"
+    echo "           f   -- Verilog file list"
+    echo "           cs  -- C shell script   "
+    echo "           bs  -- Bash shell script"
+    echo "           d   -- Document         "
     echo ""
-    exit
+    exit 1
 fi
+
+[ "$#" -ge 3 -a "$3" == "-test" ] && exit 0
 
 if [ "$1" == "c" -o "$1" == "h" ]; then
 #{{{
     type="C/C++"
-    echo '// +FHDR-----------------------------------------------------------------------'   
-    echo "// $title"        
-    echo "// Filename        : $2"                                                          
-    echo '// Version         : $Revision: $'                                                
-    echo '// Last Modified On: $Date: $'                                                    
-    echo '// Last Modified By: $Author: $'                                                  
-    echo '//                   '                                                            
-    echo '// File Description: '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// Reuse Issues    : '                                                            
-    echo '// Parameters      : '                                                            
-    echo '//                   '                                                            
-    echo '// Abbreviations   : '                                                            
-    echo '// Release History : '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo "// Author          : $author"                                                     
-    echo "// Created On      : $times"                                                      
-    echo "// Format          : $type"                                                       
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// $Log: '$2',v $'                                                                
-    echo '// -FHDR-----------------------------------------------------------------------'   
-    echo ''
+    echo '// +FHDR-----------------------------------------------------------------------'
+    echo "// $title"
+    echo "// Filename        : $2"
+    echo '// File Description: '
+    echo '// ----------------------------------------------------------------------------'
+    echo '// Reuse Issues    : '
+    echo '// Abbreviations   : '
+    echo '// Release History : '
+    echo '// ----------------------------------------------------------------------------'
+    echo "// Author          : $author"
+    echo "// Created On      : $times"
+    echo "// Format          : $type"
+    echo '// ----------------------------------------------------------------------------'
+    echo '// $Log: '$2',v $'
+    echo '// -FHDR-----------------------------------------------------------------------'
 #}}}
-elif [ "$1" == "v" ]; then
+elif [ "$1" == "d" ]; then
+#{{{
+    echo '// +FHDR //////////////////////////////////////////////////////////////////////'
+    echo "   Copyright (c) 2013-$year $passportname ($author). All rights reserved."
+    echo "   Filename        : $2"
+    echo '   File Description: '
+    echo '   ----------------------------------------------------------------------------'
+    echo '   Abbreviations   : '
+    echo '   Release History : '
+    echo '   ----------------------------------------------------------------------------'
+    echo "   Author          : $author"
+    echo "   Created On      : $times"
+    echo "   Format          : $type"
+    echo '   ----------------------------------------------------------------------------'
+    echo '   $Log: '$2',v $'
+    echo '// -FHDR //////////////////////////////////////////////////////////////////////'
+#}}}
+elif [ "$1" == "v" -o "$1" == "t" ]; then
 #{{{
     type="Verilog"
-    module_name=$(echo $2 | sed 's/\.v//g')
-    echo '// +FHDR-----------------------------------------------------------------------'   
-    echo "// $title"        
-    echo "// Filename        : $2"                                                          
-    echo '// Version         : $Revision: $'                                                
-    echo '// Last Modified On: $Date: $'                                                    
-    echo '// Last Modified By: $Author: $'                                                  
-    echo '//                   '                                                            
-    echo '// File Description: '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// Reuse Issues    : '                                                            
-    echo '// Parameters      : '                                                            
-    echo '// Reset Strategy  : '                                                            
-    echo '// Clock Domain    : '                                                            
-    echo '//                   '                                                            
-    echo '// Abbreviations   : '                                                            
-    echo '// Prefix          : c_<var> - current time'                                      
-    echo '//                   n_<var> - next time'                                         
-    echo '// Postfix         : <var>_n - negtive sensitive signal'                          
-    echo '//                   <var>_r - flip-flop'                                         
-    echo '//                   <var>_w - wire drive a flip-flop'                            
-    echo '// Release History : '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo "// Author          : $author"                                                     
-    echo "// Created On      : $times"                                                      
-    echo "// Format          : $type"                                                       
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// $Log: '$2',v $'                                                                
-    echo '// -FHDR-----------------------------------------------------------------------'   
-    echo ''                                                                                 
-#}}}
-elif [ "$1" == "t" ]; then
-#{{{
-    type="Verilog"
-    module_name=$(echo $2 | sed 's/\.v//g')
-    echo '// +FHDR-----------------------------------------------------------------------'   
-    echo "// $title"        
-    echo "// Filename        : $2"                                                          
-    echo '// Version         : $Revision: $'                                                
-    echo '// Last Modified On: $Date: $'                                                    
-    echo '// Last Modified By: $Author: $'                                                  
-    echo '//                   '                                                            
-    echo '// File Description: '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// Reuse Issues    : '                                                            
-    echo '// Parameters      : '                                                            
-    echo '// Reset Strategy  : '                                                            
-    echo '// Clock Domain    : '                                                            
-    echo '//                   '                                                            
-    echo '// Abbreviations   : '                                                            
-    echo '// Prefix          : c_<var> - current time'                                      
-    echo '//                   n_<var> - next time'                                         
-    echo '// Postfix         : <var>_n - negtive sensitive signal'                          
-    echo '//                   <var>_r - flip-flop'                                         
-    echo '//                   <var>_w - wire drive a flip-flop'                            
-    echo '// Release History : '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo "// Author          : $author"                                                     
-    echo "// Created On      : $times"                                                      
-    echo "// Format          : $type"                                                       
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// $Log: '$2',v $'                                                                
-    echo '// -FHDR-----------------------------------------------------------------------'   
-    echo ''                                                                                 
+    echo '// +FHDR-----------------------------------------------------------------------'
+    echo "// $title"
+    echo "// Filename        : $2"
+    echo '// File Description: '
+    echo '// ----------------------------------------------------------------------------'
+    echo '// Reuse Issues    : '
+    echo '// Reset Strategy  : '
+    echo '// Clock Domain    : '
+    echo '// Abbreviations   : '
+    echo '// Prefix          : c_<var> - current time'
+    echo '//                   n_<var> - next time'
+    echo '// Postfix         : <var>_n - negtive sensitive signal'
+    echo '//                   <var>_r - flip-flop'
+    echo '//                   <var>_w - wire drive a flip-flop'
+    echo '// Release History : '
+    echo '// ----------------------------------------------------------------------------'
+    echo "// Author          : $author"
+    echo "// Created On      : $times"
+    echo "// Format          : $type"
+    echo '// ----------------------------------------------------------------------------'
+    echo '// $Log: '$2',v $'
+    echo '// -FHDR-----------------------------------------------------------------------'
 #}}}
 elif [ "$1" == "f" ]; then
 #{{{
     type="Verilog"
-    echo '// +FHDR-----------------------------------------------------------------------'   
-    echo "// $title"        
-    echo "// Filename        : $2"                                                          
-    echo '// Version         : $Revision: $'                                                
-    echo '// Last Modified On: $Date: $'                                                    
-    echo '// Last Modified By: $Author: $'                                                  
-    echo '//                   '                                                            
-    echo '// File Description: '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// Reuse Issues    : '                                                            
-    echo '//                   '                                                            
-    echo '// Abbreviations   : '                                                            
-    echo '// Release History : '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo "// Author          : $author"                                                     
-    echo "// Created On      : $times"                                                      
-    echo "// Format          : $type"                                                       
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// $Log: '$2',v $'                                                                
-    echo '// -FHDR-----------------------------------------------------------------------'   
-    echo ''                                                                                 
+    echo '// +FHDR-----------------------------------------------------------------------'
+    echo "// $title"
+    echo "// Filename        : $2"
+    echo '// File Description: '
+    echo '// ----------------------------------------------------------------------------'
+    echo '// Reuse Issues    : '
+    echo '// Abbreviations   : '
+    echo '// Release History : '
+    echo '// ----------------------------------------------------------------------------'
+    echo "// Author          : $author"
+    echo "// Created On      : $times"
+    echo "// Format          : $type"
+    echo '// ----------------------------------------------------------------------------'
+    echo '// $Log: '$2',v $'
+    echo '// -FHDR-----------------------------------------------------------------------'
 #}}}
 elif [ "$1" == "bs" -o "$1" == "cs" ]; then
 #{{{
     type="Shell script"
-    echo '// +FHDR-----------------------------------------------------------------------'   
-    echo "// $title"        
-    echo "// Filename        : $2"                                                          
-    echo '// Version         : $Revision: $'                                                
-    echo '// Last Modified On: $Date: $'                                                    
-    echo '// Last Modified By: $Author: $'                                                  
-    echo '//                   '                                                            
-    echo '// File Description: '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// Reuse Issues    : '                                                            
-    echo '// Parameter       : '                                                            
-    echo '//                   '                                                            
-    echo '// Abbreviations   : '                                                            
-    echo '// Release History : '                                                            
-    echo '// ----------------------------------------------------------------------------'   
-    echo "// Author          : $author"                                                     
-    echo "// Created On      : $times"                                                      
-    echo "// Format          : $type"                                                       
-    echo '// ----------------------------------------------------------------------------'   
-    echo '// $Log: '$2',v $'                                                                
-    echo '// -FHDR-----------------------------------------------------------------------'   
-    echo ''
+    echo '## +FHDR-----------------------------------------------------------------------'
+    echo "## $title"
+    echo "## Filename        : $2"
+    echo '## File Description: '
+    echo '## ----------------------------------------------------------------------------'
+    echo '## Reuse Issues    : '
+    echo '## Abbreviations   : '
+    echo '## Release History : '
+    echo '## ----------------------------------------------------------------------------'
+    echo "## Author          : $author"
+    echo "## Created On      : $times"
+    echo "## Format          : $type"
+    echo '## ----------------------------------------------------------------------------'
+    echo '## $Log: '$2',v $'
+    echo '## -FHDR-----------------------------------------------------------------------'
 #}}}
 fi
 
-        
