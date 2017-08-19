@@ -86,7 +86,7 @@ elif [ "$1" == "v" -o "$1" == "t" ]; then
     echo '//                   n_<var> - next time'
     echo '// Postfix         : <var>_n - negtive sensitive signal'
     echo '//                   <var>_r - flip-flop'
-    echo '//                   <var>_w - wire drive a flip-flop'
+    echo '//                   <var>_w - wire drives a flip-flop'
     echo '// Release History : '
     echo '// ----------------------------------------------------------------------------'
     echo "// Author          : $author"
