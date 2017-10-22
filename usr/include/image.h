@@ -66,8 +66,4 @@ int ReadBMP (char *img_fn,
 */
 int RGB24toYUY2 (unsigned char *in_buf, unsigned char *out_buf, int img_w, int img_h);
 
-#ifndef WIN32
-inline int clip (int x);
-#endif  //WIN32
-
 #endif

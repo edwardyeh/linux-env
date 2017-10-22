@@ -10,11 +10,11 @@ export DEBUG   = -g
 export IMAGE_VER = 1.0.0
 ################################################################################
 
-.PHONY: all image bmp2yuv
+.PHONY: all image bmp2yuv precision_calc
 
 IMAGE_MVER=`echo $(IMAGE_VER) | sed 's/\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)/\1/g'`
 
-all: image
+all: image bmp2yuv precision_calc
 
 image:
 	$(CC) $(CFLAGS) -fpic -c $(SRC_DIR)/image.c
@@ -27,3 +27,6 @@ image:
 
 bmp2yuv:
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/bmp2yuv bmp2yuv.c -limage
+
+precision_calc:
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/precision_calc precision_calc.c 

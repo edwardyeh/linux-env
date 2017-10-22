@@ -25,6 +25,10 @@
 #include <math.h>
 #include "image.h"
 
+#ifndef WIN32
+static inline int clip (int x) { return ((x < 0) ? 0 : ((x > 255) ? 255 : x)); }
+#endif  //WIN32
+
 /*
 *******************************************************************************
 *  Function name: ReadBMP
@@ -145,6 +149,3 @@ int RGB24toYUY2 (unsigned char *in_buf, unsigned char *out_buf, int img_w, int i
     return 0;
 } //int RGB24toYUV2 (
 
-#ifndef WIN32
-inline int clip (int x) { return ((x < 0) ? 0 : ((x > 255) ? 255 : x)); }
-#endif  //WIN32
