@@ -66,6 +66,8 @@ alias du='du -h'
 alias df='df -h'
 alias ssh='ssh -X'
 alias grep='grep --color=auto'
+alias grepl='function func { grep --color=always $* | less -R; }; func'
+alias egrep='egrep --color=auto'
 alias mkpatch='diff -Naur'
 #alias ct='ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .'
 #alias cs='cscope -Rbq -f'
@@ -75,9 +77,23 @@ alias cs='cscope -Rbkq'
 alias setdis='setenv DISPLAY'
 alias svn_del="find -type d -name '.svn' | xargs rm -rf"
 alias svn_diff='function func { svn diff --diff-cmd=svndiff $*; }; func'
+alias svn_mdiff="svn st | grep '^M' | awk '{print "'$2'"}' | xargs -i svn diff --diff-cmd=svndiff {}"
+alias svn_stu="svn st | grep '^?' | awk '{print "'$2'"}'"
+alias svn_sta="svn st | grep '^A' | awk '{print "'$2'"}'"
+alias svn_std="svn st | grep '^D' | awk '{print "'$2'"}'"
+alias svn_stm="svn st | grep '^M' | awk '{print "'$2'"}'"
+alias svn_stc="svn st | egrep '^C| C ' | awk '{print "'$2'"}'"
+alias svn_stl="svn st | grep '^!' | awk '{print "'$2'"}'"
 alias git_del="find -type d -name '.git' | xargs rm -rf"
 alias git_diff='function func { git difftool -t gvimdiff -y $*; }; func'
 alias gd='gvim -d'
 alias acalc='function func { awk "BEGIN{ print $* }"; }; func'
 alias xterm='xterm -fg gray -bg black'
+alias fp_cmp='function func { echo "if ($*) 1 else 0" | bc; }; func'
+alias rand='echo $RANDOM'
+alias fn='function func { find -name $*; }; func'
+alias fn_full='function func { find `\pwd` -name $*; }; func'
+alias showfile='function func { find `\pwd`/$* -type f; }; func'
+alias showdir='function func { find `\pwd`/$* -maxdepth 0 -type d; }; func'
+alias tree='function func { tree -C $*; }; func'
 
