@@ -16,7 +16,8 @@ fi
 #    Common enviroment
 ## ------------------------------------------------------
 umask 022               # file permission mask ; rwxr#xr#x
-export TMOUT=3600       # disable auto-logout
+#export TMOUT=3600       # disable auto-logout
+export TMOUT=0          # disable auto-logout
 
 HISTSIZE=100            # history list size
 HISTFILESIZE=100        # save history when logout
