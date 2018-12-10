@@ -1,0 +1,21 @@
+[user]
+	name = Edward Yeh
+	email = yhh76227@gmail.com
+[diff]
+	tool = vimdiff
+[difftool]
+	prompt = false
+[merge]
+	tool = vimdiff
+[mergetool]
+	prompt = false
+[alias]
+	d = difftool
+	m = mergetool
+	st = status
+	co = checkout
+	ci = commit
+	br = branch
+	lg = log --graph
+	lo = log --oneline
+	lgo = log --graph --oneline
