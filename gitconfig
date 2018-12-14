@@ -19,3 +19,6 @@
 	lg = log --graph
 	lo = log --oneline
 	lgo = log --graph --oneline
+	la = log --all
+	lga = log --graph --all
+	lgoa = log --graph --oneline --all
