@@ -1,6 +1,8 @@
 [user]
 	name = Edward Yeh
 	email = yhh76227@gmail.com
+[core]
+	editor = gvim
 [diff]
 	tool = vimdiff
 [difftool]
