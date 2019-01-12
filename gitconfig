@@ -4,11 +4,11 @@
 [core]
 	editor = gvim
 [diff]
-	tool = vimdiff
+	tool = gvimdiff
 [difftool]
 	prompt = false
 [merge]
-	tool = vimdiff
+	tool = gvimdiff
 [mergetool]
 	prompt = false
 [alias]
@@ -24,3 +24,5 @@
 	la = log --all
 	lga = log --graph --all
 	lgoa = log --graph --oneline --all
+[http]
+	#sslVerify = false
