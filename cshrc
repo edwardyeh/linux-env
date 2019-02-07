@@ -1,6 +1,6 @@
 #!/bin/csh -f
-echo "Running .cshrc ..."
-echo "Shell evnironment setting ..."
+#echo "Running .cshrc ..."
+#echo "Shell evnironment setting ..."
 
 ## ------------------------------------------------------
 #    Common enviroment

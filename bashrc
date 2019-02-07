@@ -1,7 +1,7 @@
 #!/bin/bash -f
-echo "Running .bashrc ..."
-echo "Shell evnironment setting ..."
-echo ""
+#echo "Running .bashrc ..."
+#echo "Shell evnironment setting ..."
+#echo ""
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
