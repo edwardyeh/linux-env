@@ -2,7 +2,8 @@
 	name = Edward Yeh
 	email = yhh76227@gmail.com
 [core]
-	editor = gvim
+	editor = gvim -f
+    whitespace = trailing-space
 [diff]
 	tool = gvimdiff
 [difftool]
@@ -14,15 +15,15 @@
 [alias]
 	d = difftool
 	m = mergetool
-	st = status
+	st = status -s
 	co = checkout
 	ci = commit
 	br = branch
 	lg = log --graph
 	lo = log --oneline
 	lgo = log --graph --oneline
-	la = log --all
-	lga = log --graph --all
-	lgoa = log --graph --oneline --all
+	la = log --all --date-order
+	lga = log --graph --all --date-order
+	lgoa = log --graph --oneline --all --date-order
 [http]
 	#sslVerify = false
