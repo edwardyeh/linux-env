@@ -23,7 +23,11 @@
 	lo = log --oneline
 	lgo = log --graph --oneline
 	la = log --all --date-order
+    loa = log --online --all --date-order
 	lga = log --graph --all --date-order
 	lgoa = log --graph --oneline --all --date-order
 [http]
 	#sslVerify = false
+[color]
+    #status = always
+    #ui = always
