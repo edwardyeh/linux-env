@@ -1,0 +1,44 @@
+#! /bin/bash -f
+## +FHDR=======================================================================
+## Copyright (c) 2019 Hsin-Hsien Yeh (Edward Yeh).
+## All rights reserved.
+## ----------------------------------------------------------------------------
+## Filename         : chpath
+## File Description : File/Directory path format change
+## ----------------------------------------------------------------------------
+## Author           : Edward Yeh
+## Created On       : Sat, May 11, 2019  3:39:55 PM
+## Format           : Shell script
+## ----------------------------------------------------------------------------
+## Reuse Issues     : 
+## Release History  : 
+## -FHDR=======================================================================
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: chpath [OPTION] [PATH]"
+    echo "Convert Unix and Windows format paths."
+    echo ""
+    echo "  -u      Unix format path"
+    echo "  -w      Windows format path"
+    echo ""
+    exit
+fi
+
+if [ $1 == "-u" ]; then
+    path=$(echo "$2" | sed 's/://g')
+    path=$(echo $path | sed 's/\\/\//g')
+    echo "/$path"
+elif [ $1 == "-w" ]; then
+    path=$(echo $2 | sed 's/^\/\([[:alpha:]]*\)\/\(.*\)/\1:\\\2/g')
+    path=$(echo $path | sed 's/\//\\/g')
+    echo $path
+else
+    echo "Usage: chpath [OPTION] [PATH]"
+    echo "Convert Unix and Windows format paths."
+    echo ""
+    echo "  -u      Unix format path"
+    echo "  -w      Windows format path"
+    echo ""
+    exit
+fi
+
