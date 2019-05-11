@@ -15,6 +15,7 @@
 [alias]
 	d = difftool
 	m = mergetool
+    rt = remote
 	st = status -s
 	co = checkout
 	ci = commit
