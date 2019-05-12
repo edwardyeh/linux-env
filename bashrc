@@ -77,7 +77,7 @@ alias mkpatch='diff -Naur'
 alias ct='ctags -R'
 alias cs='cscope -Rbkq'
 #alias ctags='/home/ASIC3/users/hhyeh/VIM_plugin/ctags-5.8/ctags'
-alias setdis='setenv DISPLAY'
+#alias setdis='setenv DISPLAY'
 alias svn_del="find -type d -name '.svn' | xargs rm -rf"
 alias svn_diff='function func { svn diff --diff-cmd=svndiff $*; }; func'
 alias svn_mdiff="svn st | grep '^M' | awk '{print "'$2'"}' | xargs -i svn diff --diff-cmd=svndiff {}"
@@ -87,6 +87,10 @@ alias svn_std="svn st | grep '^D' | awk '{print "'$2'"}'"
 alias svn_stm="svn st | grep '^M' | awk '{print "'$2'"}'"
 alias svn_stc="svn st | egrep '^C| C ' | awk '{print "'$2'"}'"
 alias svn_stl="svn st | grep '^!' | awk '{print "'$2'"}'"
+alias git_stm="git status -s . | grep '^ M' | awk '{print "'$2'"}'"
+alias git_stmc="git status -s . | grep '^M ' | awk '{print "'$2'"}'"
+alias git_stu="git status -s . | grep '^??' | awk '{print "'$2'"}'"
+alias git_sta="git status -s . | grep '^A' | awk '{print "'$2'"}'"
 alias git_del="find -type d -name '.git' | xargs rm -rf"
 alias git_diff='function func { git difftool -t gvimdiff -y $*; }; func'
 alias gd='gvim -d'
@@ -100,5 +104,6 @@ alias showfile='function func { find `\pwd`/$* -type f; }; func'
 alias showdir='function func { find `\pwd`/$* -maxdepth 0 -type d; }; func'
 alias tree='function func { tree -C $*; }; func'
 alias title='function func { echo -en "\033]0;$*\a"; }; func'
+alias find_empty='find -name ".git" -prune -o -type d -empty -print'
 #alias gvim='/c/Windows/gvim.bat'
 #alias gvimdiff='/c/Windows/gvimdiff.bat'
