@@ -1,0 +1,38 @@
+#! /bin/bash -f
+## +FHDR=======================================================================
+## Copyright (c) 2019 Hsin-Hsien Yeh (Edward Yeh).
+## All rights reserved.
+## ----------------------------------------------------------------------------
+## Filename         : tvproj
+## File Description : Tmux project script
+## ----------------------------------------------------------------------------
+## Author           : Edward Yeh
+## Created On       : Fri Jun 14 21:05:39 CST 2019
+## Format           : Shell script
+## ----------------------------------------------------------------------------
+## Reuse Issues     : 
+## Release History  : 
+## -FHDR=======================================================================
+
+if [ "$#" -lt 1 ]; then
+    echo "usage: tvproj <session name>"
+    echo ""
+    exit
+fi
+
+tmux has-session -t $1 &> /dev/null
+
+if [ "$?" -eq 0 ]; then
+    echo "This session is exist."
+else
+    tmux new-session -s $1 -n c-model -d
+    tmux new-window -n hdl   -t $1
+    tmux new-window -n model -t $1
+    tmux new-window -n moni  -t $1
+    tmux new-window -n tb    -t $1
+    tmux new-window -n sim   -t $1
+    tmux new-window -n syn   -t $1
+    tmux new-window -n repo  -t $1
+    tmux a -t $1
+fi
+
