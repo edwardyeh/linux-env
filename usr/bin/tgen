@@ -3,36 +3,33 @@
 ## Copyright (c) 2019 Hsin-Hsien Yeh (Edward Yeh).
 ## All rights reserved.
 ## ----------------------------------------------------------------------------
-## Filename         : tvproj
-## File Description : Tmux project script
+## Filename         : tgen
+## File Description : Tmux for general terminal
 ## ----------------------------------------------------------------------------
 ## Author           : Edward Yeh
-## Created On       : Fri Jun 14 21:05:39 CST 2019
+## Created On       : Mon Jun 17 22:07:57 CST 2019
 ## Format           : Shell script
 ## ----------------------------------------------------------------------------
 ## Reuse Issues     : 
 ## Release History  : 
 ## -FHDR=======================================================================
 
-if [ "$#" -lt 1 ]; then
-    echo "usage: tvproj <session name>"
-    echo ""
-    exit
-fi
+alias acalc='function func { awk "BEGIN{ print $* }"; }; func'
 
-tmux has-session -t $1 &> /dev/null
-
-if [ "$?" -eq 0 ]; then
-    echo "This session is exist."
+if [ "$#" -gt 1 ]; then
+    tmux $* -d
 else
-    tmux new-session -s $1 -n c-model -d
-    tmux new-window -n hdl   -t $1
-    tmux new-window -n model -t $1
-    tmux new-window -n moni  -t $1
-    tmux new-window -n tb    -t $1
-    tmux new-window -n sim   -t $1
-    tmux new-window -n syn   -t $1
-    tmux new-window -n repo  -t $1
-    tmux a -t $1
+    tmux new -d
 fi
 
+if [ $? -eq 0 ]; then
+    for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
+        eval val=\$$var
+        tmux send-key "tmux setenv $var '$val'" C-m
+        tmux send-key "export $var='$val'" C-m
+    done
+
+    tmux send-key "clear" C-m
+    sleep 0.2
+    tmux a
+fi
