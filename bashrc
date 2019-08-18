@@ -32,6 +32,8 @@ pcdis=""
 #  source $POWERLINE_SCRIPT
 #fi
 
+complete -cf sudo
+
 ########################################################
 ###        Edward Yeh's environment                  ###
 ########################################################
