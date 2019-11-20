@@ -4,6 +4,7 @@
 [core]
 	editor = gvim -f
     whitespace = trailing-space
+    quotepath = false
 [diff]
 	tool = gvimdiff
 [difftool]
