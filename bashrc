@@ -115,6 +115,7 @@ alias title='function func { echo -en "\033]0;$*\a"; }; func'
 alias find_empty='find -name ".git" -prune -o -type d -empty -print'
 
 if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
+    export PATH="$PATH:/c/Users/Public/DevKit/Vim/vim81"
     alias gvim='/c/Windows/gvim.bat'
     alias gvimdiff='/c/Windows/gvimdiff.bat'
 fi
