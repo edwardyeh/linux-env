@@ -51,7 +51,7 @@ if [ "$1" == "bs" ]; then
     header_gen $1 $2 >> $2
     echo '' >> $2
     echo 'alias acalc='"'"'function func { awk "BEGIN{ print $* }"; }; func'"'" >> $2
-    echo ''
+    echo '' >> $2
     chmod +x $2
 elif [ "$1" == "cs" ]; then
     echo '#! /bin/csh -f' > $2
@@ -59,6 +59,12 @@ elif [ "$1" == "cs" ]; then
     echo '' >> $2
     echo 'alias acalc '"'"'awk "BEGIN{ print \!* }"'"'" >> $2
     echo 'alias "bash -c '"'"'echo "'"'"'$RANDOM'"'"'"'"'"'"' >> $2
+    echo '' >> $2
+    chmod +x $2
+elif [ "$1" == "py" ]; then
+    echo '#! /usr/bin/python3' > $2
+    header_gen $1 $2 >> $2
+    echo '' >> $2
     chmod +x $2
 else
     header_gen $1 $2 >> $2

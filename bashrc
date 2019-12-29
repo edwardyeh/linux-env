@@ -48,6 +48,7 @@ export  SVN_REPO="$HOME/Database/Repo/SVN"
 export  GIT_REPO="$HOME/Database/Repo/GIT"
 export  SVN_URL="file://$SVN_REPO"
 export  WS="$HOME/Workspace"
+export  MSYS_LOC="/c/Users/Public/DevKit/MSYS2-x64/"
 
 ## ------------------------------------------------------
 #    Prompt setting

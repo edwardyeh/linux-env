@@ -34,15 +34,19 @@ elif [ $1 == "-v" ]; then
 
     if [ `basename $SHELL` == "bash" ]; then
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
-            eval val=\$$var
-            tmux send-key "tmux setenv $var '$val'" C-m
-            tmux send-key "export $var='$val'" C-m
+            if [ -z `echo $var | egrep '\(|\)'` ]; then
+                eval val=\$$var
+                tmux send-key "tmux setenv $var '$val'" C-m
+                tmux send-key "export $var='$val'" C-m
+            fi
         done
     else
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
-            eval val=\$$var
-            tmux send-key "tmux setenv $var '$val'" C-m
-            tmux send-key "setenv $var '$val'" C-m
+            if [ -z `echo $var | egrep '\(|\)'` ]; then
+                eval val=\$$var
+                tmux send-key "tmux setenv $var '$val'" C-m
+                tmux send-key "setenv $var '$val'" C-m
+            fi
         done
     fi
 

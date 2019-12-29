@@ -11,7 +11,8 @@ note=""
 if [ "$#" -lt 2 ] || \
    [ "$1" != "c" -a "$1" != "h" -a \
      "$1" != "v" -a "$1" != "t" -a "$1" != "f" -a \
-     "$1" != "cs" -a "$1" != "bs" -a "$1" != d ]; then
+     "$1" != "cs" -a "$1" != "bs" -a "$1" != "py" -a \
+     "$1" != "d" ]; then
 
     [ "$#" -ge 3 -a "$3" == "-test" ] && exit 1
 
@@ -29,6 +30,7 @@ if [ "$#" -lt 2 ] || \
     echo "           f   -- Verilog file list"
     echo "           cs  -- C shell script   "
     echo "           bs  -- Bash shell script"
+    echo "           py  -- Python script    "
     echo "           d   -- Document         "
     echo ""
     exit 1
@@ -47,6 +49,9 @@ elif [ "$1" == "d" ]; then
     note="//"
 elif [ "$1" == "bs" -o "$1" == "cs" ]; then
     type="Shell script"
+    note="##"
+elif [ "$1" == "py" ]; then
+    type="Python script"
     note="##"
 fi
 
@@ -80,7 +85,7 @@ elif [ "$1" == "v" -o "$1" == "t" ]; then
 elif [ "$1" == "f" ]; then
     echo "$note Reuse Issues     : "
     echo "$note Release History  : "
-elif [ "$1" == "bs" -o "$1" == "cs" ]; then
+elif [ "$1" == "bs" -o "$1" == "cs" -o "$1" == "py" ]; then
     echo "$note Reuse Issues     : "
     echo "$note Release History  : "
 elif [ "$1" == "d" ]; then
