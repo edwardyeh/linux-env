@@ -1,0 +1,38 @@
+#! /bin/bash -f
+## +FHDR=======================================================================
+## Copyright (c) 2020 Hsin-Hsien Yeh (Edward Yeh).
+## All rights reserved.
+## ----------------------------------------------------------------------------
+## Filename         : xclip
+## File Description : 
+## ----------------------------------------------------------------------------
+## Author           : Edward Yeh
+## Created On       : Thu, Feb 20, 2020 11:32:12 PM
+## Format           : Shell script
+## ----------------------------------------------------------------------------
+## Reuse Issues     : 
+## Release History  : 
+## -FHDR=======================================================================
+
+alias acalc='function func { awk "BEGIN{ print $* }"; }; func'
+
+while [[ $# > 0 ]]  
+do  
+  key="$1"
+
+  case $key in
+    -o|-out)
+    OUT=1
+    shift
+    ;;
+    *)
+    shift
+    ;;
+  esac
+done
+
+if [[ $OUT -eq 0 ]]; then  
+  cat - > /dev/clipboard
+else  
+  cat /dev/clipboard
+fi
