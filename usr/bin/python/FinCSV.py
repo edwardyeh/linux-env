@@ -85,10 +85,19 @@ class FinCSV:
     #}}}
 
     def search_trans (self, index: int, content: str) -> list:
-        """Search transactions from internal table"""   #{{{
+        """Return a table with specific transactions (1 line format)"""  #{{{
         trans = []
         for tran in self.trans:
             if tran[index] == content:
+                trans.append(tran)
+        return [self.header, trans]
+    #}}}
+
+    def del_trans (self, index: int, content: str) -> list:
+        """Return a table without specific transactions (1 line format)"""  #{{{
+        trans = []
+        for tran in self.trans:
+            if tran[index] != content:
                 trans.append(tran)
         return [self.header, trans]
     #}}}
@@ -111,6 +120,16 @@ class GnuCashCSV (FinCSV):
                       'Amount With Sym', 'Amount Num.', 'Reconcile', 
                       'Reconcile Date', 'Rate/Price']
         FinCSV.__init__(self, table, header_ref)
+    #}}}
+
+    def search_trans (self, index: int, content: str) -> list:
+        """Dummy function"""  #{{{
+        print('[Warning] No support!!!')
+    #}}}
+
+    def del_trans (self, index: int, content: str) -> list:
+        """Dummy function"""  #{{{
+        print('[Warning] No support!!!')
     #}}}
 
     def add_rev_exp_bc (self, ln_no: int, src_trans: list) -> int:  
