@@ -8,10 +8,6 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
-if [ -f ~/.bashrc_org ]; then
-    source ~/.bashrc_org
-fi
-
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
@@ -19,10 +15,15 @@ umask 022               # file permission mask ; rwxr#xr#x
 #export TMOUT=3600       # disable auto-logout
 export TMOUT=0          # disable auto-logout
 
-HISTSIZE=100            # history list size
-HISTFILESIZE=100        # save history when logout
-localdis=$DISPLAY
-pcdis=""
+# don't put duplicate lines or lines starting with space in the history.
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE
+HISTSIZE=100
+HISTFILESIZE=100
 
 #stty erase "^H" kill "^U" intr "^C"  eof "^D" susp "^Z" echoe
 #stty sane
@@ -37,18 +38,19 @@ complete -cf sudo
 ########################################################
 ###        Edward Yeh's environment                  ###
 ########################################################
-export  TERM="xterm-256color"
-export  LANG="en_US.UTF-8"
-export  LC_ALL="en_US.UTF-8"
-export  LS_COLORS="no=00:fi=00:di=00;94:ln=00;36:pi=40;33:so=00;35:bd=40;33;01:cd=40;33;01:or=01;05;37;41:mi=01;05;37;41:ex=00;32:*.cmd=00;32:*.exe=00;32:*.com=00;32:*.btm=00;32:*.bat=00;32:*.sh=00;32:*.csh=00;32:*.tar=00;31:*.tgz=00;31:*.arj=00;31:*.taz=00;31:*.lzh=00;31:*.zip=00;31:*.z=00;31:*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.bz=00;31:*.tz=00;31:*.rpm=00;31:*.cpio=00;31:*.jpg=00;35:*.gif=00;35:*.bmp=00;35:*.xbm=00;35:*.xpm=00;35:*.png=00;35:*.tif=00;35:"
-export  PATH="$HOME/opt/Eclipse/eclipse:$PATH"
-export  PATH="$HOME/opt/OpenJDK/jdk/bin:$PATH"
-export  PATH="$HOME/usr/bin:$HOME/.linux-env/usr/bin:$HOME/.linux-env/usr/bin/python:$PATH"
-export  SVN_REPO="$HOME/Database/Repo/SVN"
-export  GIT_REPO="$HOME/Database/Repo/GIT"
-export  SVN_URL="file://$SVN_REPO"
-export  WS="$HOME/Workspace"
-export  MSYS_LOC="/c/Users/Public/DevKit/MSYS2-x64/"
+export TERM="xterm-256color"
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+export LS_COLORS="ow=33:no=00:fi=00:di=00;94:ln=00;36:pi=40;33:so=00;35:bd=40;33;01:cd=40;33;01:or=01;05;37;41:mi=01;05;37;41:ex=00;32:*.cmd=00;32:*.exe=00;32:*.com=00;32:*.btm=00;32:*.bat=00;32:*.sh=00;32:*.csh=00;32:*.tar=00;31:*.tgz=00;31:*.arj=00;31:*.taz=00;31:*.lzh=00;31:*.zip=00;31:*.z=00;31:*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.bz=00;31:*.tz=00;31:*.rpm=00;31:*.cpio=00;31:*.jpg=00;35:*.gif=00;35:*.bmp=00;35:*.xbm=00;35:*.xpm=00;35:*.png=00;35:*.tif=00;35:"
+export JAVA_HOME="$HOME/opt/OpenJDK/jdk"
+export PATH="$HOME/usr/bin:$HOME/.linux-env/usr/bin:$PATH"
+export PATH="$JAVA_HOME/bin:$PATH"
+export PATH="$HOME/opt/Eclipse/eclipse:$PATH"
+export SVN_REPO="$HOME/Database/Repo/SVN"
+export GIT_REPO="$HOME/Database/Repo/GIT"
+export SVN_URL="file://$SVN_REPO"
+export WS="$HOME/Workspace"
+export MSYS_LOC="/c/Users/Public/DevKit/MSYS2-x64/"
 
 ## ------------------------------------------------------
 #    Prompt setting
@@ -69,9 +71,10 @@ PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "
 alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; func'
 alias c='clear'
 alias h='history'
-alias ls='function func { ls -F $* --color=always; }; func'
-alias la='function func { ls -aF  $*; }; func'
-alias ll='function func { ls -lhF $*; }; func'
+alias ls='ls -F --color=always'
+alias la='ls -aF'
+alias ll='ls -lhF'
+alias lla='ls -alhF'
 alias rm='rm -i'
 alias cvst="cvs st | grep -E 'Locally|Patch|Merged'"
 alias du='du -h'
@@ -114,6 +117,11 @@ alias showdir='function func { find `\pwd`/$* -maxdepth 0 -type d; }; func'
 alias tree='function func { tree -C $*; }; func'
 alias title='function func { echo -en "\033]0;$*\a"; }; func'
 alias find_empty='find -name ".git" -prune -o -type d -empty -print'
+alias add-cflags='function func { export CFLAGS="-I$* ${CFLAGS}"; }; func'
+alias add-ldflags='function func { export LDFLAGS="-L$* -Wl,--rpath=$* ${LDFLAGS}"; }; func'
+alias pc-suspend='systemctl suspend'
+alias pc-hibernate='systemctl hibernate'
+alias open='xdg-open'
 
 if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
     export PATH="$PATH:/c/Users/Public/DevKit/Vim/vim81"

@@ -6,11 +6,11 @@
     whitespace = trailing-space
     quotepath = false
 [diff]
-	tool = vimdiff
+	tool = gvimdiff
 [difftool]
 	prompt = false
 [merge]
-	tool = vimdiff
+	tool = gvimdiff
 [mergetool]
 	prompt = false
 [alias]
