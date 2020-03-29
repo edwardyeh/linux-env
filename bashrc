@@ -124,7 +124,7 @@ alias pc-hibernate='systemctl hibernate'
 alias open='xdg-open'
 
 if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
-    export PATH="$PATH:/c/Users/Public/DevKit/Vim/vim81"
+    export PATH="$PATH:/c/Users/Public/DevKit/Vim/vim"
     alias gvim='/c/Windows/gvim.bat'
     alias gvimdiff='/c/Windows/gvimdiff.bat'
 fi
