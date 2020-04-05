@@ -52,6 +52,9 @@ export SVN_URL="file://$SVN_REPO"
 export WS="$HOME/Workspace"
 export MSYS_LOC="/c/Users/Public/DevKit/MSYS2-x64/"
 
+export RDP_HD1609="1920x1050"
+export RDP_HD1610="1920x1143"
+
 ## ------------------------------------------------------
 #    Prompt setting
 ## ------------------------------------------------------
@@ -59,7 +62,7 @@ cdexpr='.*/\(.*/.*\)$'
 cdcwd=`expr "$PWD" : "$cdexpr"`
 #PS1="`hostname`:<$cdcwd>[\!] "
 #PS1="`hostname`> "
-PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "
+PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
 
 ## ------------------------------------------------------
 #    Job alias
@@ -119,10 +122,19 @@ alias title='function func { echo -en "\033]0;$*\a"; }; func'
 alias find_empty='find -name ".git" -prune -o -type d -empty -print'
 alias add-cflags='function func { export CFLAGS="-I$* ${CFLAGS}"; }; func'
 alias add-ldflags='function func { export LDFLAGS="-L$* -Wl,--rpath=$* ${LDFLAGS}"; }; func'
+
+## ------------------------------------------------------
+#    Gnome alias
+## ------------------------------------------------------
 alias pc-suspend='systemctl suspend'
 alias pc-hibernate='systemctl hibernate'
 alias open='xdg-open'
+alias rdp-edward-nb-1610="xfreerdp /u:edward /size:$RDP_HD1610 /v:edward-nb"
+alias rdp-edward-nb-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:edward-nb"
 
+## ------------------------------------------------------
+#    MINGW/MSYS Setting
+## ------------------------------------------------------
 if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
     export PATH="$PATH:/c/Users/Public/DevKit/Vim/vim"
     alias gvim='/c/Windows/gvim.bat'
