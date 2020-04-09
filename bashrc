@@ -71,7 +71,7 @@ PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
 ## ------------------------------------------------------
 #    User alias
 ## ------------------------------------------------------
-alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; func'
+alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; func'
 alias c='clear'
 alias h='history'
 alias ls='ls -F --color=always'
