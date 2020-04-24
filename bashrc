@@ -58,6 +58,10 @@ export RDP_HD1610="1920x1143"
 ## ------------------------------------------------------
 #    Prompt setting
 ## ------------------------------------------------------
+if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
+    export USER=$USERNAME
+fi
+
 cdexpr='.*/\(.*/.*\)$'
 cdcwd=`expr "$PWD" : "$cdexpr"`
 #PS1="`hostname`:<$cdcwd>[\!] "
