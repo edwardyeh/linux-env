@@ -67,6 +67,8 @@ cdcwd=`expr "$PWD" : "$cdexpr"`
 #PS1="`hostname`:<$cdcwd>[\!] "
 #PS1="`hostname`> "
 PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
+#PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "
+#PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "
 
 ## ------------------------------------------------------
 #    Job alias
@@ -76,6 +78,8 @@ PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
 #    User alias
 ## ------------------------------------------------------
 alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; func'
+#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "; }; func'
+#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "; }; func'
 alias c='clear'
 alias h='history'
 alias ls='ls -F --color=always'
