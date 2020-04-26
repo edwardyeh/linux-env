@@ -52,8 +52,8 @@ export SVN_URL="file://$SVN_REPO"
 export WS="$HOME/Workspace"
 export MSYS_LOC="/c/Users/Public/DevKit/MSYS2-x64/"
 
-export RDP_HD1609="1920x1050"
-export RDP_HD1610="1920x1143"
+export RDP_HD1609="1920x1043"
+export RDP_HD1610="1920x1136"
 
 ## ------------------------------------------------------
 #    Prompt setting
