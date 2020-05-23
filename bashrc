@@ -43,6 +43,7 @@ export JAVA_HOME="$HOME/opt/OpenJDK/jdk"
 export PATH="$HOME/opt/bin:$HOME/usr/bin:$HOME/.linux-env/usr/bin:$PATH"
 export PATH="$JAVA_HOME/bin:$PATH"
 export PATH="$HOME/opt/Eclipse/eclipse:$PATH"
+export PYTHONPATH="/home/edward/usr/tools/dev-tool/python"
 export SVN_REPO="$HOME/Database/Repo/SVN"
 export GIT_REPO="$HOME/Database/Repo/GIT"
 export SVN_URL="file://$SVN_REPO"
@@ -63,7 +64,7 @@ cdexpr='.*/\(.*/.*\)$'
 cdcwd=`expr "$PWD" : "$cdexpr"`
 #PS1="`hostname`:<$cdcwd>[\!] "
 #PS1="`hostname`> "
-PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
+PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "  # default
 #PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "
 #PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "
 
@@ -74,7 +75,7 @@ PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "
 ## ------------------------------------------------------
 #    User alias
 ## ------------------------------------------------------
-alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]$USER@$HOSTNAME:<$cdcwd>\[\e[0m\] "; }; func'
+alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "; }; func'  # default
 #alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "; }; func'
 #alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "; }; func'
 alias c='clear'
