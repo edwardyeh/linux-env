@@ -56,17 +56,18 @@ export RDP_HD1610="1920x1136"
 ## ------------------------------------------------------
 #    Prompt setting
 ## ------------------------------------------------------
-if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
-    export USER=$USERNAME
-fi
-
 cdexpr='.*/\(.*/.*\)$'
 cdcwd=`expr "$PWD" : "$cdexpr"`
-#PS1="`hostname`:<$cdcwd>[\!] "
-#PS1="`hostname`> "
-PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "  # default
-#PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "
-#PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "
+
+if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
+    export USER=$USERNAME
+    PS1="\[\e[1;31m\]\u@\h:<$cdcwd>\[\e[0m\] "
+else
+    PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "
+fi
+
+#PS1="\[\e[1;32m\]\u@\u\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "
+#PS1="\[\e[1;32m\]\u@]u\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "
 
 ## ------------------------------------------------------
 #    Job alias
@@ -75,9 +76,14 @@ PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "  # default
 ## ------------------------------------------------------
 #    User alias
 ## ------------------------------------------------------
-alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "; }; func'  # default
-#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "; }; func'
-#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]$USER@$HOSTNAME\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "; }; func'
+if [ -n "`uname | grep 'MINGW\|MSYS'`" ]; then
+    alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;31m\]\u@\h:<$cdcwd>\[\e[0m\] "; }; func'
+else
+    alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;91m\]\u@\h:<$cdcwd>\[\e[0m\] "; }; func'
+fi
+
+#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]<$cdcwd>\[\e[0m\] "; }; func'
+#alias cd='function func { cd "$*"; echo $PWD; cdcwd=`expr "/$PWD" : "$cdexpr"`; PS1="\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]$cdcwd\[\e[0m\]$ "; }; func'
 alias c='clear'
 alias h='history'
 alias ls='ls -F --color=always'
