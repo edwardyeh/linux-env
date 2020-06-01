@@ -51,7 +51,7 @@ elif [ "$1" == "bs" -o "$1" == "cs" ]; then
     type="Shell script"
     note="##"
 elif [ "$1" == "py" ]; then
-    type="Python script"
+    type="Python module"
     note="##"
 fi
 

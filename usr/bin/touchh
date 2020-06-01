@@ -62,7 +62,7 @@ elif [ "$1" == "cs" ]; then
     echo '' >> $2
     chmod +x $2
 elif [ "$1" == "py" ]; then
-    echo '#!/usr/bin/env python'    > $2
+    echo '#!/usr/bin/env python3'   > $2
     echo '# -*- coding: utf-8 -*-' >> $2
     header_gen $1 $2 >> $2
     echo '' >> $2
