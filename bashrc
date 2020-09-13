@@ -134,6 +134,7 @@ alias title='function func { echo -en "\033]0;$*\a"; }; func'
 alias find_empty='find -name ".git" -prune -o -type d -empty -print'
 alias add-cflags='function func { export CFLAGS="-I$* ${CFLAGS}"; }; func'
 alias add-ldflags='function func { export LDFLAGS="-L$* -Wl,--rpath=$* ${LDFLAGS}"; }; func'
+alias vim-swap='find ~/.vim/swap -name "%*" | xargs -i basename {} | sed "s/\%/\//g; s/\.swp$//g"'
 
 ## ------------------------------------------------------
 #    Gnome alias
