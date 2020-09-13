@@ -75,18 +75,21 @@ elif [ "$1" == "v" -o "$1" == "t" ]; then
     echo "$note Reuse Issues     : "
     echo "$note Reset Strategy   : "
     echo "$note Clock Domain     : "
-    echo "$note Abbreviations    : "
     echo "$note Prefix           : c_<var> - current time"
     echo "$note                    n_<var> - next time"
     echo "$note Postfix          : <var>_n - negtive sensitive signal"
     echo "$note                    <var>_r - flip-flop"
     echo "$note                    <var>_w - wire drives a flip-flop"
+    echo "$note                    <var>_s - signed variable"
+    echo "$note ----------------------------------------------------------------------------"
     echo "$note Release History  : "
 elif [ "$1" == "f" ]; then
     echo "$note Reuse Issues     : "
+    echo "$note ----------------------------------------------------------------------------"
     echo "$note Release History  : "
 elif [ "$1" == "bs" -o "$1" == "cs" -o "$1" == "py" ]; then
     echo "$note Reuse Issues     : "
+    echo "$note ----------------------------------------------------------------------------"
     echo "$note Release History  : "
 elif [ "$1" == "d" ]; then
     echo "$note Release History  : "
