@@ -11,7 +11,7 @@ set autologout=0    	# disable autologout
 set filec       		# file name matching
 set notify      		# background jobs status notification
 unset noclobber     	# disable output redirection to overwrite existing files
-umask 022       		# file permission mask ; rwxr#xr#x
+umask 027       		# file permission mask ; rwxr-x---
 limit coredumpsize 0    # limit coredump size
 set cdpath=(~)      	# easy convenient path search & change
 set localdis= $DISPLAY

@@ -6,7 +6,7 @@
 ## ------------------------------------------------------
 #    Common enviroment
 ## ------------------------------------------------------
-umask 022               # file permission mask ; rwxr#xr#x
+umask 027               # file permission mask ; rwxr-x---
 #export TMOUT=3600       # disable auto-logout
 export TMOUT=0          # disable auto-logout
 
