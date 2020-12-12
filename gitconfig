@@ -21,6 +21,7 @@
 	co = checkout
 	ci = commit
 	br = branch
+    rs = restore
 	lg = log --graph
 	lo = log --oneline
 	lgo = log --graph --oneline
