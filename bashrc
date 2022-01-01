@@ -142,8 +142,11 @@ alias vim-swap='find ~/.vim/swap -name "%*" | xargs -i basename {} | sed "s/\%/\
 alias pc-suspend='systemctl suspend'
 #alias pc-hibernate='systemctl hibernate'
 alias open='xdg-open'
-alias rdp-edward-nb-1610="xfreerdp /u:edward /size:$RDP_HD1610 /v:edward-nb"
-alias rdp-edward-nb-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:edward-nb"
+alias rdp-edward-nb-1610="xfreerdp /u:edward /size:$RDP_HD1610 /v:edward-nb /sound /microphone"
+alias rdp-edward-nb-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:edward-nb /sound /microphone"
+alias rdp-dell-da310-1610="xfreerdp /u:edward /size:$RDP_HD1610 /v:dell-da310 /sound /microphone"
+alias rdp-dell-da310-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:dell-da310 /sound /microphone"
+alias rdp-dell-da310-multi="xfreerdp /u:edward /v:dell-da310 /multimon /sound /microphone"
 
 ## ------------------------------------------------------
 #    MINGW/MSYS Setting

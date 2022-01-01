@@ -36,29 +36,30 @@ elif [ $1 == "-v" ]; then
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
             if [ -z `echo $var | egrep '\(|\)'` ]; then
                 eval val=\$$var
-                tmux send-key "tmux setenv $var '$val'" C-m
-                tmux send-key "export $var='$val'" C-m
+                tmux send-key -t $2 "tmux setenv $var '$val'" C-m
+                tmux send-key -t $2 "export $var='$val'" C-m
             fi
         done
     else
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
             if [ -z `echo $var | egrep '\(|\)'` ]; then
                 eval val=\$$var
-                tmux send-key "tmux setenv $var '$val'" C-m
-                tmux send-key "setenv $var '$val'" C-m
+                tmux send-key -t $2 "tmux setenv $var '$val'" C-m
+                tmux send-key -t $2 "setenv $var '$val'" C-m
             fi
         done
     fi
 
-    tmux send-key "clear" C-m
-    #sleep 0.2
+    tmux send-key -t $2 "clear" C-m
+
+    sleep 1
 
     tmux new-window -n hdl   -t $2
-    tmux new-window -n model -t $2
-    tmux new-window -n moni  -t $2
     tmux new-window -n tb    -t $2
+    tmux new-window -n lib   -t $2
     tmux new-window -n sim   -t $2
     tmux new-window -n syn   -t $2
+    tmux new-window -n tool  -t $2
     tmux new-window -n repo  -t $2
     tmux a -t $2
 else
