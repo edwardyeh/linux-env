@@ -1,0 +1,42 @@
+T: [Global]
+
+H: 0x00
+age_go                  0   0   0x0     "Engine start trigger"
+sw_rst_like2axi         27  27  0x0
+sw_rst_axi_128_arbit    29  29  0x0
+sw_rst_setting          30  30  0x0
+sw_rst                  31  31  0X0
+                                
+H: 0x04                         
+engine_busy_status      31  0   0x0
+                                
+A: 0x08                         
+age_cycle_counter       31  0   0x0     "cycle count"
+
+T: [SRC1]
+                                
+A: 0x18                         
+src1_ch0_en                 0   0   0x0
+src1_ch1_en                 1   1   0x0
+src1_ch2_en                 2   2   0x0
+src1_ch1_boda_mode          5   4   0x0
+src1_sram_size_ch0_in32x64  9   8   0x0
+src1_sram_base_ch1_in32x64  13  12  0x0
+src1_sram_size_ch1_in32x64  17  16  0x0
+src1_sram_base_ch2_in32x64  21  20  0x0
+src1_sram_size_ch2_in32x64  25  24  0x0
+src1_pixel_width_ch0        29  28  0x0
+src1_pixel_width_1248_ch0   31  30  0x0
+
+A: 0x1c
+src1_pixel_width_ch1    1   0   0x0
+src1_pixel_width_ch2    5   4   0x0
+src1_yuyv_en            6   6   0x0
+src_yuyv_mode           7   7   0x0
+src1_l_shift_ch1        9   8   0x0
+src1_l_shift_ch2        11  10  0x0
+src1_c0_width           18  16  0x0
+src1_c1_width           22  20  0x0
+src1_c2_width           26  24  0x0
+src1_c3_width           30  28  0x0
+
