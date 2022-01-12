@@ -151,7 +151,24 @@ class RegisterTable:
     def cfg_dump(self, is_export: bool):
         """Dump config text""" #{{{
 
-        pass
+        with open('table_dump.txt', 'w') as f:
+            for addr, reg_list in self.reg_table.items():
+                f.write('\n')
+                f.write(''.join([reg_list[0], ' ', hex(addr)]))
+                if reg_list[1] != None:
+                    f.write(''.join([' '*8, '"', reg_list[1], '"\n']))
+                else:
+                    f.write('\n')
+
+                for reg in reg_list[3:]:
+                    f.write(''.join([reg[0].lower(), ' ', 
+                                    str(reg[1]), ' ',
+                                    str(reg[2]), ' ',
+                                    hex(reg[3])]))
+                    if reg[4] != None:
+                        f.write(' "' + reg[4] + '"\n')
+                    else:
+                        f.write('\n')
     #}}}
 
     def xls_dump(self, is_export: bool):
@@ -365,12 +382,13 @@ def main(is_debug=False):
     pat_list = None
     if args.is_inverse:
         pat_list = RegisterTable(args.file, 'xls', is_debug)
+        pat_list.cfg_dump(args.is_export)
     else:
         pat_list = RegisterTable(args.file, 'cfg', is_debug)
         pat_list.xls_dump(args.is_export)
 #}}}
 
 if __name__ == '__main__':
-    main(True)
+    main(False)
 else:
     pass
