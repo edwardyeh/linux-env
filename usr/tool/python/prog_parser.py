@@ -31,7 +31,7 @@ class PatternList:
     #{{{
         self.is_debug = is_debug
         self.comment_sign = '#'
-        self.reg_table = {}
+        self.reg_table = {}     # {addr1: reg_list1, addr2: reg_list2, ...}
         self.pat_list  = []
 
         if table_type == 'cfg':

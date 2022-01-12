@@ -176,7 +176,8 @@ class GnuCashCSV (FinCSV):
             if tran_split:  # [Memo]
                 tran_dst += [tran_src[10][len(note):]]
             else:
-                tran_dst += ['']
+                # tran_dst += ['']
+                tran_dst += [self.trans[gc_idx][4]]
 
             tran_dst += [tran_src[6] + ':' + tran_src[7]]   # [Account]
             tran_dst += ['', '']                            # [Account name, Amount with sym]
