@@ -1,11 +1,11 @@
 T: [Global]
 
-H: 0x00
+H: 0x00     "Go Engine Register"
 age_go                  0   0   0x0     "Engine start trigger"
 sw_rst_like2axi         27  27  0x0
 sw_rst_axi_128_arbit    29  29  0x0
 sw_rst_setting          30  30  0x0
-sw_rst                  31  31  0X0
+sw_rst                  31  31  0x0
                                 
 H: 0x04                         
 engine_busy_status      31  0   0x0
