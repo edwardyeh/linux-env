@@ -21,12 +21,11 @@ import shutil
 import argparse
 import textwrap
 import openpyxl
-
+from openpyxl.styles import Alignment
+from openpyxl.styles import Border
 from openpyxl.styles import Font
 from openpyxl.styles import PatternFill
-from openpyxl.styles import Border
 from openpyxl.styles import Side
-from openpyxl.styles import Alignment
 
 ### Class Definition ###
 
@@ -35,10 +34,13 @@ class RegisterTable:
 
     def __init__(self, reg_fn: str, table_type: str, is_debug: bool):
     #{{{
+        # reg_table = {addr1: reg_list1, addr2: reg_list2, ...}
+        # reg_list = [type, tag, title, max_len, reg1, reg2, ...]
+        # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
+
         self.is_debug = is_debug
         self.comment_sign = '#'
-        self.reg_table = {}     # {addr1: reg_list1, addr2: reg_list2, ...}
-        self.pat_list  = []
+        self.reg_table = {}
 
         if table_type == 'cfg':
             self.cfg_reg_parser(reg_fn)
@@ -50,10 +52,8 @@ class RegisterTable:
 
     def cfg_reg_parser(self, reg_fn: str):
         """Parse co nfig type register table"""  #{{{
-
         with open(reg_fn, 'r') as f:
-            # reg_list = [type, title, tag, reg1, reg2, ...]
-            reg_list = [None, None, None] 
+            reg_list = [None, None, None, 0] 
             reg_act = False
             reg_addr = 0
 
@@ -64,28 +64,33 @@ class RegisterTable:
                     if toks[0] == 'H:' or toks[0] == 'A:' or toks[0] == 'T:':
                         if reg_act:
                             self.reg_table[reg_addr] = reg_list
-                            reg_list = [None, None, None]
+                            reg_list = [None, None, None, 0]
+
                         if toks[0] == 'T:':
+                            reg_list[1] = toks[1]
                             reg_act = False
-                            reg_list[2] = toks[1]
                         else:
-                            reg_act = True
                             reg_addr = self.get_int_val(toks[1])
                             reg_list[0] = toks[0]
                             if len(toks) > 2:
-                                reg_list[1] = ' '.join(toks[2:]).strip("\"\'")
+                                reg_list[2] = ' '.join(toks[2:]).strip("\"\'")
+                            reg_act = True
                     else:
-                        # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
-                        reg = [toks[0].upper(), 
-                               int(toks[1]), 
-                               int(toks[2]), 
+                        reg = [toks[0].upper(), int(toks[1]), int(toks[2]), 
                                self.get_int_val(toks[3])]
+
                         if len(toks) > 4:
                             reg.append(' '.join(toks[4:]).strip("\"\'"))
                         else:
                             reg.append(None)
-                        reg.append(None)    # row_idx is no use in this mode
+
+                        reg.append(None)  # row_idx is no use in this mode
+
+                        name_len = len(reg[0])
+                        if name_len > reg_list[3]:
+                            reg_list[3] = name_len
                         reg_list.append(reg)
+
                 line = f.readline()
 
             if reg_act:
@@ -97,34 +102,34 @@ class RegisterTable:
 
     def xls_reg_parser(self, reg_fn: str):
         """Parse excel type register table"""  #{{{
-
-        wb = openpyxl.load_workbook(reg_fn)
-        ws = wb.worksheets[0]
-
-        # reg_list = [type, title, tag, reg1, reg2, ...]
-        reg_list = [None, None, None] 
+        reg_list = [None, None, None, 0] 
         reg_act = False
         reg_addr = 0
+
+        wb = openpyxl.load_workbook(reg_fn, data_only=True)
+        ws = wb.worksheets[0]
 
         addr_col = tuple(ws.iter_cols(1, 1, None, None, True))[0]
         for i in range(addr_col.index('ADDR')+1, len(addr_col)):
             row_idx = i + 1
-            val = addr_col[i]
-            if val is not None:
-                val = str(val)
+
+            addr = addr_col[i]
+            if addr is not None:
                 if reg_act:
                     self.reg_table[reg_addr] = reg_list
-                if val == 'none':
+
+                addr = str(addr)
+                if addr == 'none':
                     break
                 else:
-                    reg_addr = int(val, 16)
+                    reg_addr = int(addr, 16)
                     if ws.cell(row_idx, 1).font.__getattr__('color'):
-                        reg_list = ['H:', None, None]
+                        reg_list = ['H:', None, None, 0]
                     else:
-                        reg_list = ['A:', None, None]
+                        reg_list = ['A:', None, None, 0]
                     title = ws.cell(row_idx, 2).value
                     if title is not None:
-                        reg_list[1] = str(title)
+                        reg_list[2] = str(title)
 
             reg_val = self.get_int_val(str(ws.cell(row_idx, 3).value))
 
@@ -134,11 +139,20 @@ class RegisterTable:
             else:
                 msb = lsb = int(bits[0])
 
-            toks = str(ws.cell(row_idx, 5).value).split();
+            toks = str(ws.cell(row_idx, 5).value).split('\n');
             reg_name = toks[0].upper()
-            comment = None if len(toks) == 1 else ' '.join(toks[1:])
 
-            # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
+            if len(toks) == 1:
+                comment = None
+            else:
+                for i in range(1, len(toks)):
+                    toks[i] = toks[i].strip()
+                comment = ', '.join(toks[1:])
+
+            name_len = len(reg_name)
+            if name_len > reg_list[3]:
+                reg_list[3] = name_len
+
             reg_list.append([reg_name, msb, lsb, reg_val, comment, row_idx])
             reg_act = True
 
@@ -150,189 +164,224 @@ class RegisterTable:
 
     def cfg_dump(self, is_export: bool):
         """Dump config text""" #{{{
-
         with open('table_dump.txt', 'w') as f:
+            is_first = True
+
             for addr, reg_list in self.reg_table.items():
-                f.write('\n')
-                f.write(''.join([reg_list[0], ' ', hex(addr)]))
-                if reg_list[1] != None:
-                    f.write(''.join([' '*8, '"', reg_list[1], '"\n']))
+                name_len = (reg_list[3] >> 2 << 2) + 4
+
+                if not is_first:
+                    f.write('\n')
+
+                if reg_list[1] is not None:
+                    f.write('T: {reg_list[1]}\n')
+
+                f.write('{} {:9}'.format(reg_list[0], hex(addr)))
+
+                if reg_list[2] is not None:
+                    f.write(f'"{reg_list[2]}"\n')
                 else:
                     f.write('\n')
 
-                for reg in reg_list[3:]:
-                    f.write(''.join([reg[0].lower(), ' ', 
-                                    str(reg[1]), ' ',
-                                    str(reg[2]), ' ',
-                                    hex(reg[3])]))
-                    if reg[4] != None:
-                        f.write(' "' + reg[4] + '"\n')
+                for reg in reg_list[4:]:
+                    f.write('{}{}{:<4}{:<4}{:<12}'.format(reg[0].lower(), 
+                                                          (' ' * (name_len - len(reg[0]))),
+                                                          reg[1], 
+                                                          reg[2], 
+                                                          hex(reg[3])))
+
+                    if reg[4] is not None:
+                        f.write(f'"{reg[4]}"\n')
                     else:
                         f.write('\n')
+
+                is_first = False
     #}}}
 
     def xls_dump(self, is_export: bool):
         """Dump excel file""" #{{{
+        GREY_FONT = Font(color='808080')
 
-        ### initial workbook ###
+        GREEN_FILL = PatternFill(fill_type='solid', start_color='92d050')
+        GREY_FILL = PatternFill(fill_type='solid', start_color='dddddd')
+        ORANGE_FILL = PatternFill(fill_type='solid', start_color='ffcc99')
+        YELLOW_FILL = PatternFill(fill_type='solid', start_color='ffffcc')
+        VIOLET_FILL = PatternFill(fill_type='solid', start_color='e6ccff')
+
+        THIN_SIDE = Side(border_style='thin', color='000000')
+        OUTER_BORDER = Border(left=THIN_SIDE, right=THIN_SIDE, top=THIN_SIDE, bottom=THIN_SIDE)
+
+        LT_ALIGN = Alignment(horizontal='left', vertical='top', wrapText=True)
+        LC_ALIGN = Alignment(horizontal='left', vertical='center', wrapText=True)
+        CT_ALIGN = Alignment(horizontal='center', vertical='top', wrapText=True)
+        CC_ALIGN = Alignment(horizontal='center', vertical='center', wrapText=True)
+        RT_ALIGN = Alignment(horizontal='right', vertical='top', wrapText=True)
+        RC_ALIGN = Alignment(horizontal='right', vertical='center', wrapText=True)
+
+        # Initial workbook 
 
         wb = openpyxl.Workbook()
         ws = wb.worksheets[0]
-
-        grey_font = Font(color='808080')
-        orange_fill = PatternFill(fill_type='solid', start_color='ffcc99')
-        yellow_fill = PatternFill(fill_type='solid', start_color='ffffcc')
-        green_fill = PatternFill(fill_type='solid', start_color='92d050')
-        violet_fill = PatternFill(fill_type='solid', start_color='e6ccff')
-        grey_fill = PatternFill(fill_type='solid', start_color='dddddd')
-        thin_side = Side(border_style='thin', color='000000')
-        around_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
-        left_top_align = Alignment(horizontal='left', vertical='top')
-        left_center_align = Alignment(horizontal='left', vertical='center')
-        center_top_align = Alignment(horizontal='center', vertical='top')
-        center_center_align = Alignment(horizontal='center', vertical='center')
-        right_top_align = Alignment(horizontal='right', vertical='top')
-        right_center_align = Alignment(horizontal='right', vertical='center')
 
         ws.column_dimensions['A'].width = 15.46
         ws.column_dimensions['B'].width = 41.23
         ws.column_dimensions['C'].width = 10.31
         ws.column_dimensions['D'].width = 10.31
-        ws.column_dimensions[chr(65+4)].width = 41.23
+        ws.column_dimensions['E'].width = 41.23
+
+        for i in (1, 2):
+            row = ws.row_dimensions[i]
+            row.fill = VIOLET_FILL
+            row.border = OUTER_BORDER
+            row.alignment = CC_ALIGN
+
+        for i in (3, 4, 5):
+            row = ws.row_dimensions[i]
+            row.border = OUTER_BORDER
+            row.alignment = CC_ALIGN
+
+        row = ws.row_dimensions[6]
+        row.fill = GREEN_FILL
+        row.border = OUTER_BORDER
+        row.alignment = CC_ALIGN
 
         for row in ws['A1:D5']:
             for cell in row:
-                cell.border = around_border
+                cell.border = OUTER_BORDER
+                cell.alignment = CC_ALIGN
 
-        values = ['chip', 'eng.', 'date']
+        values = ['Chip', 'Eng.', 'Date']
         for row, val in enumerate(values, start=2):
             cell = ws.cell(row, 1, val)
-            cell.fill = orange_fill
-            cell.alignment = center_center_align
+            cell.fill = ORANGE_FILL
+            cell.border = OUTER_BORDER
+            cell.alignment = CC_ALIGN
 
         values = ['Number', 'FileName', 'Metion1', 'Metion2', 'PatternStatus']
         for row, val in enumerate(values, start=1):
             cell = ws.cell(row, 5, val)
-            cell.fill = yellow_fill
-            cell.border = around_border
-            cell.alignment = left_center_align
+            cell.fill = YELLOW_FILL
+            cell.border = OUTER_BORDER
+            cell.alignment = LC_ALIGN
 
         cell = ws.cell(6, 1, 'ADDR')
-        cell.fill = green_fill
-        cell.border = around_border
-        cell.alignment = center_center_align
+        cell.fill = GREEN_FILL
+        cell.border = OUTER_BORDER
+        cell.alignment = CC_ALIGN
 
         cell = ws.cell(6, 2, 'Register')
-        cell.fill = green_fill
-        cell.border = around_border
-        cell.alignment = left_center_align
+        cell.fill = GREEN_FILL 
+        cell.border = OUTER_BORDER
+        cell.alignment = LC_ALIGN
 
         cell = ws.cell(6, 3, 'INI')
-        cell.fill = green_fill
-        cell.border = around_border
-        cell.alignment = right_center_align
+        cell.fill = GREEN_FILL
+        cell.border = OUTER_BORDER
+        cell.alignment = RC_ALIGN
 
         cell = ws.cell(6, 4, 'Bits')
-        cell.fill = green_fill
-        cell.border = around_border
-        cell.alignment = right_center_align
+        cell.fill = GREEN_FILL
+        cell.border = OUTER_BORDER
+        cell.alignment = RC_ALIGN
 
         cell = ws.cell(6, 5, 'Member')
-        cell.fill = green_fill
-        cell.border = around_border
-        cell.alignment = left_center_align
-
-        for row in ws['F1:AMJ1']:
-            for cell in row:
-                cell.fill = violet_fill
-                cell.border = around_border
-                cell.alignment = center_center_align
-
-        for row in ws['F2:AMJ2']:
-            for cell in row:
-                cell.fill = violet_fill
-                cell.border = around_border
-                cell.alignment = center_center_align
-
-        for row in ws['F3:AMJ3']:
-            for cell in row:
-                cell.border = around_border
-                cell.alignment = center_center_align
-
-        for row in ws['F4:AMJ4']:
-            for cell in row:
-                cell.border = around_border
-                cell.alignment = center_center_align
-
-        for row in ws['F5:AMJ5']:
-            for cell in row:
-                cell.border = around_border
-                cell.alignment = center_center_align
-
-        for row in ws['F6:AMJ6']:
-            for cell in row:
-                cell.fill = green_fill 
-                cell.border = around_border
-                cell.alignment = center_center_align
+        cell.fill = GREEN_FILL
+        cell.border = OUTER_BORDER
+        cell.alignment = LC_ALIGN
 
         if is_export:
-            ws.cell(1, 6, 6)
-            ws.cell(2, 6, 'PAT-1')
+            cell = ws.cell(1, 6, 6)
+            cell.fill = VIOLET_FILL
+            cell.border = OUTER_BORDER
+            cell.alignment = CC_ALIGN
 
-        ### dump register ###
+            cell = ws.cell(2, 6, 'PAT-1')
+            cell.fill = VIOLET_FILL
+            cell.border = OUTER_BORDER
+            cell.alignment = CC_ALIGN
+
+        # Dump register
 
         row_st = row_ed = 7
 
-        for addr, reg_list in self.reg_table.items():
+        for addr in sorted(tuple(self.reg_table.keys())):
+            reg_list = self.reg_table[addr]
+            cell_font = GREY_FONT if reg_list[0] == 'H:' else Font()
             is_first = True
-            cell_font = grey_font if reg_list[0] == 'H:' else Font()
 
-            for reg in reg_list[3:]:
-                cell_fill = yellow_fill if is_first else PatternFill()
+            for reg in reg_list[4:]:
+                cell_fill = YELLOW_FILL if is_first else PatternFill()
 
-                row_range = ''.join(['A', str(row_ed), ':AMJ', str(row_ed)])
-                for row in ws[row_range]:
-                    for cell in row:
-                        cell.border = around_border
-                        cell.fill = cell_fill
-                        cell.font = cell_font
-                        cell.alignment = center_center_align
+                row = ws.row_dimensions[row_ed]
+                row.font = cell_font
+                row.fill = cell_fill
+                row.border = OUTER_BORDER
+                row.alignment = CC_ALIGN
 
                 if is_first:
                     cell = ws.cell(row_ed, 1, hex(addr))
-                    cell.alignment = center_top_align
+                    cell.font = cell_font
+                    cell.fill = cell_fill
+                    cell.border = OUTER_BORDER
+                    cell.alignment = CT_ALIGN
 
-                    cell = ws.cell(row_ed, 2, reg_list[1])
-                    cell.alignment = left_top_align
+                    cell = ws.cell(row_ed, 2, reg_list[2])
+                    cell.font = cell_font
+                    cell.fill = cell_fill
+                    cell.border = OUTER_BORDER
+                    cell.alignment = LT_ALIGN
 
                 cell = ws.cell(row_ed, 3, hex(reg[3]))
-                cell.alignment = right_top_align
-
-                if is_export:
-                    ws.cell(row_ed, 6, hex(reg[3]).upper()[2:])
+                cell.font = cell_font
+                cell.fill = cell_fill
+                cell.border = OUTER_BORDER
+                cell.alignment = RT_ALIGN
 
                 if reg[1] == reg[2]:
                     cell = ws.cell(row_ed, 4, str(reg[1]))
                 else:
                     cell = ws.cell(row_ed, 4, '_'.join([str(reg[1]), str(reg[2])]))
-                cell.alignment = right_top_align
+
+                cell.font = cell_font
+                cell.fill = cell_fill
+                cell.border = OUTER_BORDER
+                cell.alignment = RT_ALIGN
 
                 if reg[0] == 'RESERVED':
                     cell = ws.cell(row_ed, 5, reg[0].lower())
                 else:
-                    comments = [] if reg[4] == None else reg[4].split(',')
-                    cell = ws.cell(row_ed, 5, '\n'.join([reg[0]] + comments))
-                cell.alignment = left_top_align
+                    toks = [] if reg[4] is None else reg[4].split(',')
+                    members = [reg[0]]
+
+                    for tok in toks:
+                        members.append(tok.strip())
+
+                    cell = ws.cell(row_ed, 5, '\n'.join(members))
+
+                cell.font = cell_font
+                cell.fill = cell_fill
+                cell.border = OUTER_BORDER
+                cell.alignment = LT_ALIGN
+
+                if is_export:
+                    cell = ws.cell(row_ed, 6, hex(reg[3]).upper()[2:])
+                    cell.font = cell_font
+                    cell.fill = cell_fill
+                    cell.border = OUTER_BORDER
+                    cell.alignment = CC_ALIGN
+
                 row_ed += 1
                 is_first = False
 
-        row_range = ''.join(['A', str(row_ed), ':AMJ', str(row_ed)])
-        for row in ws[row_range]:
-            for cell in row:
-                cell.border = around_border
-                cell.fill = grey_fill
-                cell.alignment = center_top_align
-        ws.cell(row_ed, 1, 'none')
+        row = ws.row_dimensions[row_ed]
+        row.fill = GREY_FILL
+        row.border = OUTER_BORDER
+        row.alignment = CC_ALIGN
+
+        cell = ws.cell(row_ed, 1, 'none')
+        cell.fill = GREY_FILL
+        cell.border = OUTER_BORDER
+        cell.alignment = CC_ALIGN
         row_ed += 1
 
         wb.save("table_dump.xlsx")
@@ -351,8 +400,8 @@ class RegisterTable:
         """Show register table""" #{{{
         print(comment)
         for addr, reg_list in self.reg_table.items():
-            print("{}".format([hex(addr)] + reg_list[0:3]))
-            for reg in reg_list[3:]:
+            print("{}".format([hex(addr)] + reg_list[0:4]))
+            for reg in reg_list[4:]:
                 print("  {}".format(reg))
         print()
     #}}}
@@ -379,7 +428,6 @@ def main(is_debug=False):
     args = parser.parse_args()
 
     ## Parser register table & dump
-    pat_list = None
     if args.is_inverse:
         pat_list = RegisterTable(args.file, 'xls', is_debug)
         pat_list.cfg_dump(args.is_export)

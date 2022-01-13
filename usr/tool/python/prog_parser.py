@@ -18,6 +18,7 @@
 ## ============================================================================
 
 import os
+import copy
 import shutil
 import argparse
 import textwrap
@@ -30,9 +31,16 @@ class PatternList:
 
     def __init__(self, reg_fn: str, table_type: str, is_debug: bool):
     #{{{
+        # reg_table = {addr1: reg_list1, addr2: reg_list2, ...}
+        # reg_list = [type, tag, title, max_len, reg1, reg2, ...]
+        # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
+        # pat_list = [[pat_name1, pat_table1], [pat_name2, pat_table2], ...]
+        # pat_table = {addr1: val_list1, addr2: val_list2, ...}
+        # val_list = [val1, val2, ...]
+
         self.is_debug = is_debug
         self.comment_sign = '#'
-        self.reg_table = {}     # {addr1: reg_list1, addr2: reg_list2, ...}
+        self.reg_table = {}
         self.pat_list  = []
 
         if table_type == 'cfg':
@@ -44,11 +52,9 @@ class PatternList:
     #}}}
 
     def cfg_reg_parser(self, reg_fn: str):
-        """Parse config type register table"""  #{{{
-
+        """Parse co nfig type register table"""  #{{{
         with open(reg_fn, 'r') as f:
-            # reg_list = [type, title, tag, reg1, reg2, ...]
-            reg_list = [None, None, None] 
+            reg_list = [None, None, None, 0] 
             reg_act = False
             reg_addr = 0
 
@@ -59,28 +65,33 @@ class PatternList:
                     if toks[0] == 'H:' or toks[0] == 'A:' or toks[0] == 'T:':
                         if reg_act:
                             self.reg_table[reg_addr] = reg_list
-                            reg_list = [None, None, None]
+                            reg_list = [None, None, None, 0]
+
                         if toks[0] == 'T:':
+                            reg_list[1] = toks[1]
                             reg_act = False
-                            reg_list[2] = toks[1]
                         else:
-                            reg_act = True
                             reg_addr = self.get_int_val(toks[1])
                             reg_list[0] = toks[0]
                             if len(toks) > 2:
-                                reg_list[1] = ' '.join(toks[2:]).strip("\"\'")
+                                reg_list[2] = ' '.join(toks[2:]).strip("\"\'")
+                            reg_act = True
                     else:
-                        # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
-                        reg = [toks[0].upper(), 
-                               int(toks[1]), 
-                               int(toks[2]), 
+                        reg = [toks[0].upper(), int(toks[1]), int(toks[2]), 
                                self.get_int_val(toks[3])]
+
                         if len(toks) > 4:
                             reg.append(' '.join(toks[4:]).strip("\"\'"))
                         else:
                             reg.append(None)
-                        reg.append(None)    # row_idx is no use in this mode
+
+                        reg.append(None)  # row_idx is no use in this mode
+
+                        name_len = len(reg[0])
+                        if name_len > reg_list[3]:
+                            reg_list[3] = name_len
                         reg_list.append(reg)
+
                 line = f.readline()
 
             if reg_act:
@@ -92,34 +103,34 @@ class PatternList:
 
     def xls_reg_parser(self, reg_fn: str):
         """Parse excel type register table"""  #{{{
-
-        wb = openpyxl.load_workbook(reg_fn)
-        ws = wb.worksheets[0]
-
-        # reg_list = [type, title, tag, reg1, reg2, ...]
-        reg_list = [None, None, None] 
+        reg_list = [None, None, None, 0] 
         reg_act = False
         reg_addr = 0
+
+        wb = openpyxl.load_workbook(reg_fn, data_only=True)
+        ws = wb.worksheets[0]
 
         addr_col = tuple(ws.iter_cols(1, 1, None, None, True))[0]
         for i in range(addr_col.index('ADDR')+1, len(addr_col)):
             row_idx = i + 1
-            val = addr_col[i]
-            if val is not None:
-                val = str(val)
+
+            addr = addr_col[i]
+            if addr is not None:
                 if reg_act:
                     self.reg_table[reg_addr] = reg_list
-                if val == 'none':
+
+                addr = str(addr)
+                if addr == 'none':
                     break
                 else:
-                    reg_addr = int(val, 16)
+                    reg_addr = int(addr, 16)
                     if ws.cell(row_idx, 1).font.__getattr__('color'):
-                        reg_list = ['H:', None, None]
+                        reg_list = ['H:', None, None, 0]
                     else:
-                        reg_list = ['A:', None, None]
+                        reg_list = ['A:', None, None, 0]
                     title = ws.cell(row_idx, 2).value
                     if title is not None:
-                        reg_list[1] = str(title)
+                        reg_list[2] = str(title)
 
             reg_val = self.get_int_val(str(ws.cell(row_idx, 3).value))
 
@@ -129,11 +140,20 @@ class PatternList:
             else:
                 msb = lsb = int(bits[0])
 
-            toks = str(ws.cell(row_idx, 5).value).split();
+            toks = str(ws.cell(row_idx, 5).value).split('\n');
             reg_name = toks[0].upper()
-            comment = None if len(toks) == 1 else ' '.join(toks[1:])
 
-            # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
+            if len(toks) == 1:
+                comment = None
+            else:
+                for i in range(1, len(toks)):
+                    toks[i] = toks[i].strip()
+                comment = ', '.join(toks[1:])
+
+            name_len = len(reg_name)
+            if name_len > reg_list[3]:
+                reg_list[3] = name_len
+
             reg_list.append([reg_name, msb, lsb, reg_val, comment, row_idx])
             reg_act = True
 
@@ -145,22 +165,21 @@ class PatternList:
 
     def ini_parser(self, ini_fn: str, is_batch=False, start=0, end=0):
         """Pattern parser for INI format"""  #{{{
-
-        cfg_fn_list = []
+        cfg_fns = []
         if is_batch:
             with open(ini_fn, 'r') as f:
-                tmp_fn_list = f.readlines()
+                tmp_fns = f.readlines()
 
             if start == 0:
                 start = 1
-                end = len(tmp_fn_list)
+                end = len(tmp_fns)
 
             for i in range(start-1, end):
-                cfg_fn_list.append(tmp_fn_list[i].rstrip())
+                cfg_fns.append(tmp_fns[i].rstrip())
         else:
-            cfg_fn_list.append(ini_fn)
+            cfg_fns.append(ini_fn)
 
-        for cfg_fn in cfg_fn_list:
+        for cfg_fn in cfg_fns:
             cfg = {}
             with open(cfg_fn, 'r') as f:
                 line = f.readline()
@@ -184,7 +203,7 @@ class PatternList:
             pat_table = {}
             for addr, reg_list in self.reg_table.items():
                 val_list = []
-                for reg in reg_list[3:]:
+                for reg in reg_list[4:]:
                     if reg_list[0] == 'H:':
                         val_list.append(reg[3])
                     else:
@@ -201,22 +220,21 @@ class PatternList:
 
     def hex_parser(self, hex_fn: str, is_batch=False, start=0, end=0):
         """Pattern parser for HEX format"""  #{{{
-
-        cfg_fn_list = []
+        cfg_fns = []
         if is_batch:
             with open(hex_fn, 'r') as f:
-                tmp_fn_list = f.readlines()
+                tmp_fns = f.readlines()
 
             if start == 0:
                 start = 1
-                end = len(tmp_fn_list)
+                end = len(tmp_fns)
 
             for i in range(start-1, end):
-                cfg_fn_list.append(tmp_fn_list[i].rstrip())
+                cfg_fns.append(tmp_fns[i].rstrip())
         else:
-            cfg_fn_list.append(hex_fn)
+            cfg_fns.append(hex_fn)
 
-        for cfg_fn in cfg_fn_list:
+        for cfg_fn in cfg_fns:
             cfg = {}
             with open(cfg_fn, 'r') as f:
                 line = f.readline()
@@ -236,7 +254,7 @@ class PatternList:
             for addr, reg_list in self.reg_table.items():
                 val_list = []
                 if addr in cfg:
-                    for reg in reg_list[3:]:
+                    for reg in reg_list[4:]:
                         if reg_list[0] == 'H:':
                             val_list.append(reg[3])
                         else:
@@ -244,7 +262,7 @@ class PatternList:
                             reg_val = (cfg[addr] >> reg[2]) & mask
                             val_list.append(reg_val)
                 else:
-                    for reg in reg_list[3:]:
+                    for reg in reg_list[4:]:
                         val_list.append(reg[3])
                 pat_table[addr] = val_list
 
@@ -258,8 +276,7 @@ class PatternList:
 
     def xls_parser(self, xls_fn: str, is_batch=False, start=0, end=0):
         """Pattern parser for INI format"""  #{{{
-
-        wb = openpyxl.load_workbook(xls_fn)
+        wb = openpyxl.load_workbook(xls_fn, data_only=True)
         ws = wb.worksheets[0]
         
         if is_batch:
@@ -271,15 +288,15 @@ class PatternList:
 
         addr_col = tuple(ws.iter_cols(1, 1, None, None, True))[0]
         name_col = tuple(ws.iter_cols(5, 5, None, None, True))[0]
-        scan_st = addr_col.index('ADDR') + 1
-        scan_ed = addr_col.index('none')
+        row_st = addr_col.index('ADDR') + 1
+        row_ed = addr_col.index('none')
 
         for j in range(start, end+1):
             val_col = tuple(ws.iter_cols(j, j, None, None, True))[0]
             pat_name = str(val_col[1])
             cfg = {}
-            for i in range(scan_st, scan_ed):
-                reg_name = name_col[i].split()[0]
+            for i in range(row_st, row_ed):
+                reg_name = name_col[i].split('\n')[0]
                 if reg_name.upper() != 'RESERVED':
                     # val = self.get_int_val(str(val_col[i]))
                     val = int(str(val_col[i]), 16)
@@ -294,7 +311,7 @@ class PatternList:
             pat_table = {}
             for addr, reg_list in self.reg_table.items():
                 val_list = []
-                for reg in reg_list[3:]:
+                for reg in reg_list[4:]:
                     if reg_list[0] == 'H:':
                         val_list.append(reg[3])
                     else:
@@ -317,25 +334,24 @@ class PatternList:
         os.mkdir("pat_out")
 
         for pat in self.pat_list:
-            first_write = True
+            is_first = True
             pat_fn = os.path.join("pat_out", pat[0]+".ini")
             with open(pat_fn, 'w') as f:
                 for addr, reg_list in self.reg_table.items():
-                    if reg_list[2] != None:
-                        if first_write:
-                            f.write("{}\n".format(reg_list[2]))
+                    if reg_list[1] is not None:
+                        if is_first:
+                            f.write("{}\n".format(reg_list[1]))
                         else:
-                            f.write("\n{}\n".format(reg_list[2]))
+                            f.write("\n{}\n".format(reg_list[1]))
 
                     if reg_list[0] != 'H:':
-                        for val, reg in zip(pat[1][addr], reg_list[3:]):
-                            first_write = False
+                        for val, reg in zip(pat[1][addr], reg_list[4:]):
                             f.write("{} = {}".format(reg[0].lower(), val))
-                            if reg[4] != None:
-                                comment = ''.join([' '*8, "# ", reg[4], "\n"])
-                                f.write(comment)
+                            if reg[4] is not None:
+                                f.write('{}{}\n'.format(' '*8, reg[4]))
                             else:
                                 f.write("\n")
+                        is_first = False
     #}}}
 
     def hex_dump(self):
@@ -347,11 +363,11 @@ class PatternList:
         for pat in self.pat_list:
             pat_fn = os.path.join("pat_out", pat[0]+".dat")
             with open(pat_fn, 'w') as f:
-                addr_list = sorted(list(pat[1].keys()))
+                addr_list = sorted(tuple(pat[1].keys()))
                 for addr in range(0, addr_list[-1]+4, 4):
                     word_val = 0
                     if addr in pat[1]:
-                        for val, reg in zip(pat[1][addr], self.reg_table[addr][3:]):
+                        for val, reg in zip(pat[1][addr], self.reg_table[addr][4:]):
                             word_val += val << reg[2]
                     f.write("{:04x}{:08x}\n".format(addr, word_val))
     #}}}
@@ -372,16 +388,39 @@ class PatternList:
 
         for i in range(row_st, row_ed):
             string = ws.cell(i, 5).value
-            reg_name = string.split()[0]
+            reg_name = string.split('\n')[0]
             if reg_name.upper() == 'RESERVED':
-                ws.cell(i, pat_idx, 0)
+                row = ws.row_dimensions[i]
+                cell = ws.cell(i, pat_idx, 0)
+                cell.font = copy.copy(row.font)
+                cell.fill = copy.copy(row.fill)
+                cell.border = copy.copy(row.border)
+                cell.alignment = copy.copy(row.alignment)
 
         for pat in self.pat_list:
             for addr, reg_list in self.reg_table.items():
-                for val, reg in zip(pat[1][addr], reg_list[3:]):
-                    ws.cell(reg[5], pat_idx, hex(val).upper()[2:])
-            ws.cell(1, pat_idx, pat_idx)
-            ws.cell(2, pat_idx, pat[0])
+                for val, reg in zip(pat[1][addr], reg_list[4:]):
+                    row = ws.row_dimensions[reg[5]]
+                    cell = ws.cell(reg[5], pat_idx, hex(val).upper()[2:])
+                    cell.font = copy.copy(row.font)
+                    cell.fill = copy.copy(row.fill)
+                    cell.border = copy.copy(row.border)
+                    cell.alignment = copy.copy(row.alignment)
+
+            row = ws.row_dimensions[1]
+            cell = ws.cell(1, pat_idx, pat_idx)
+            cell.font = copy.copy(row.font)
+            cell.fill = copy.copy(row.fill)
+            cell.border = copy.copy(row.border)
+            cell.alignment = copy.copy(row.alignment)
+
+            row = ws.row_dimensions[2]
+            cell = ws.cell(2, pat_idx, pat[0])
+            cell.font = copy.copy(row.font)
+            cell.fill = copy.copy(row.fill)
+            cell.border = copy.copy(row.border)
+            cell.alignment = copy.copy(row.alignment)
+
             pat_idx += 1
 
         wb.save(os.path.join("pat_out", "age_reg.xlsx"))
@@ -400,8 +439,8 @@ class PatternList:
         """Show register table""" #{{{
         print(comment)
         for addr, reg_list in self.reg_table.items():
-            print("{}".format([hex(addr)] + reg_list[0:3]))
-            for reg in reg_list[3:]:
+            print("{}".format([hex(addr)] + reg_list[0:4]))
+            for reg in reg_list[4:]:
                 print("  {}".format(reg))
         print()
     #}}}
