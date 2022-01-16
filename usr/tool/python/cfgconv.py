@@ -4,7 +4,7 @@
 ## Copyright (c) 2022 Hsin-Hsien Yeh (Edward Yeh).
 ## All rights reserved.
 ## ----------------------------------------------------------------------------
-## Filename         : cfg2xls.py
+## Filename         : cfgconv.py
 ## File Description : Programming reference table convertor
 ## ----------------------------------------------------------------------------
 ## Author           : Edward Yeh
@@ -21,6 +21,7 @@ import shutil
 import argparse
 import textwrap
 import openpyxl
+
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border
 from openpyxl.styles import Font
@@ -35,25 +36,25 @@ class RegisterTable:
     def __init__(self, reg_fn: str, table_type: str, is_debug: bool):
     #{{{
         # reg_table = {addr1: reg_list1, addr2: reg_list2, ...}
-        # reg_list = [type, tag, title, max_len, reg1, reg2, ...]
-        # reg = [reg_name, msb, lsb, init_value, comment, row_idx]
+        # reg_list = [tag, title, max_len, reg1, reg2, ...]
+        # reg = [name, is_access, msb, lsb, init_val, comment, row_idx]
 
         self.is_debug = is_debug
         self.comment_sign = '#'
         self.reg_table = {}
 
-        if table_type == 'cfg':
-            self.cfg_reg_parser(reg_fn)
+        if table_type == 'txt':
+            self.txt_table_parser(reg_fn)
         elif table_type == 'xls':
-            self.xls_reg_parser(reg_fn)
+            self.xls_table_parser(reg_fn)
         else:
-            raise TypeError("Unsupport register table type ({})".format(table_type))
+            raise TypeError("Unsupport input table type ({})".format(table_type))
     #}}}
 
-    def cfg_reg_parser(self, reg_fn: str):
-        """Parse co nfig type register table"""  #{{{
+    def txt_table_parser(self, reg_fn: str):
+        """Parse text type register table"""  #{{{
         with open(reg_fn, 'r') as f:
-            reg_list = [None, None, None, 0] 
+            reg_list = [None, None, 0] 
             reg_act = False
             reg_addr = 0
 
@@ -61,36 +62,37 @@ class RegisterTable:
             while line:
                 toks = line.split()
                 if len(toks):
-                    if toks[0] == 'H:' or toks[0] == 'A:' or toks[0] == 'T:':
+                    if toks[0] == 'T:' or toks[0] == 'A:':
                         if reg_act:
                             self.reg_table[reg_addr] = reg_list
-                            reg_list = [None, None, None, 0]
+                            reg_list = [None, None, 0] 
 
                         if toks[0] == 'T:':
-                            reg_list[1] = toks[1]
+                            reg_list[0] = toks[1]  # tag
                             reg_act = False
                         else:
                             reg_addr = self.get_int_val(toks[1])
-                            reg_list[0] = toks[0]
                             if len(toks) > 2:
-                                reg_list[2] = ' '.join(toks[2:]).strip("\"\'")
+                                reg_list[1] = ' '.join(toks[2:]).strip("\"\'")  # title
                             reg_act = True
                     else:
-                        reg = [toks[0].upper(), int(toks[1]), int(toks[2]), 
-                               self.get_int_val(toks[3])]
+                        reg = [toks[0].upper(),             # name
+                               toks[1].lower(),             # is_access
+                               int(toks[2]),                # msb
+                               int(toks[3]),                # lsb
+                               self.get_int_val(toks[4])]   # init_val
 
-                        if len(toks) > 4:
-                            reg.append(' '.join(toks[4:]).strip("\"\'"))
+                        if len(toks) > 5:
+                            reg.append(' '.join(toks[5:]).strip("\"\'"))  # comment
                         else:
                             reg.append(None)
 
                         reg.append(None)  # row_idx is no use in this mode
 
                         name_len = len(reg[0])
-                        if name_len > reg_list[3]:
-                            reg_list[3] = name_len
+                        if name_len > reg_list[2]:
+                            reg_list[2] = name_len  # max_len
                         reg_list.append(reg)
-
                 line = f.readline()
 
             if reg_act:
@@ -100,9 +102,9 @@ class RegisterTable:
             self.show_reg_table("=== REG TABLE PARSER ===")
     #}}}
 
-    def xls_reg_parser(self, reg_fn: str):
+    def xls_table_parser(self, reg_fn: str):
         """Parse excel type register table"""  #{{{
-        reg_list = [None, None, None, 0] 
+        reg_list = [None, None, 0] 
         reg_act = False
         reg_addr = 0
 
@@ -113,23 +115,19 @@ class RegisterTable:
         for i in range(addr_col.index('ADDR')+1, len(addr_col)):
             row_idx = i + 1
 
-            addr = addr_col[i]
-            if addr is not None:
+            if addr_col[i] is not None:
                 if reg_act:
                     self.reg_table[reg_addr] = reg_list
 
-                addr = str(addr)
+                addr = str(addr_col[i])
                 if addr == 'none':
                     break
                 else:
                     reg_addr = int(addr, 16)
-                    if ws.cell(row_idx, 1).font.__getattr__('color'):
-                        reg_list = ['H:', None, None, 0]
-                    else:
-                        reg_list = ['A:', None, None, 0]
+                    reg_list = [None, None, 0]
                     title = ws.cell(row_idx, 2).value
                     if title is not None:
-                        reg_list[2] = str(title)
+                        reg_list[1] = str(title).strip()  # title
 
             reg_val = self.get_int_val(str(ws.cell(row_idx, 3).value))
 
@@ -140,7 +138,7 @@ class RegisterTable:
                 msb = lsb = int(bits[0])
 
             toks = str(ws.cell(row_idx, 5).value).split('\n');
-            reg_name = toks[0].upper()
+            reg_name = toks[0].strip().upper()
 
             if len(toks) == 1:
                 comment = None
@@ -149,11 +147,16 @@ class RegisterTable:
                     toks[i] = toks[i].strip()
                 comment = ', '.join(toks[1:])
 
-            name_len = len(reg_name)
-            if name_len > reg_list[3]:
-                reg_list[3] = name_len
+            if ws.cell(row_idx, 5).font.__getattr__('color'):
+                is_access = 'n'
+            else:
+                is_access = 'y'
 
-            reg_list.append([reg_name, msb, lsb, reg_val, comment, row_idx])
+            name_len = len(reg_name)
+            if name_len > reg_list[2]:
+                reg_list[2] = name_len  # max_len
+
+            reg_list.append([reg_name, is_access, msb, lsb, reg_val, comment, row_idx])
             reg_act = True
 
         wb.close()
@@ -162,44 +165,64 @@ class RegisterTable:
             self.show_reg_table("=== XLS TABLE PARSER ===")
     #}}}
 
-    def cfg_dump(self, is_export: bool):
-        """Dump config text""" #{{{
+    def txt_export(self, is_init: bool):
+        """Export text type register table""" #{{{
         with open('table_dump.txt', 'w') as f:
             is_first = True
 
             for addr, reg_list in self.reg_table.items():
-                name_len = (reg_list[3] >> 2 << 2) + 4
+                name_len = (reg_list[2] >> 2 << 2) + 4
 
                 if not is_first:
                     f.write('\n')
 
+                if reg_list[0] is not None:
+                    f.write(f'T: {reg_list[0]}\n\n')
+
+                f.write('A: {:9}'.format(hex(addr)))
+
                 if reg_list[1] is not None:
-                    f.write('T: {reg_list[1]}\n')
-
-                f.write('{} {:9}'.format(reg_list[0], hex(addr)))
-
-                if reg_list[2] is not None:
-                    f.write(f'"{reg_list[2]}"\n')
+                    f.write(f'"{reg_list[1]}"\n')
                 else:
                     f.write('\n')
 
-                for reg in reg_list[4:]:
-                    f.write('{}{}{:<4}{:<4}{:<12}'.format(reg[0].lower(), 
-                                                          (' ' * (name_len - len(reg[0]))),
-                                                          reg[1], 
-                                                          reg[2], 
-                                                          hex(reg[3])))
+                for reg in reg_list[3:]:
+                    f.write('{}{}{:<4}{:<4}{:<4}{:<12}'.format(reg[0].lower(), 
+                                                               (' ' * (name_len - len(reg[0]))),
+                                                               reg[1], 
+                                                               reg[2], 
+                                                               reg[3], 
+                                                               hex(reg[4])))
 
-                    if reg[4] is not None:
-                        f.write(f'"{reg[4]}"\n')
+                    if reg[5] is not None:
+                        f.write(f'"{reg[5]}"\n')
                     else:
                         f.write('\n')
 
                 is_first = False
+
+        if is_init:
+            is_first = True
+            with open('reg_dump.ini', 'w') as f:
+                for addr, reg_list in self.reg_table.items():
+                    if reg_list[0] is not None:
+                        if not is_first:
+                            f.write('\n')
+                        f.write(f'{reg_list[0]}\n')
+                        is_first = False
+
+                    for reg in reg_list[3:]:
+                        if reg[1] == 'y':
+                            f.write(f'{reg[0].lower()} = {reg[4]}')
+                            if reg[5] is not None:
+                                f.write(f'  # {reg[5]}\n')
+                            else:
+                                f.write('\n')
+                            is_first = False
     #}}}
 
-    def xls_dump(self, is_export: bool):
-        """Dump excel file""" #{{{
+    def xls_export(self, is_init: bool):
+        """Export excel type register table""" #{{{
         GREY_FONT = Font(color='808080')
 
         GREEN_FILL = PatternFill(fill_type='solid', start_color='92d050')
@@ -289,7 +312,7 @@ class RegisterTable:
         cell.border = OUTER_BORDER
         cell.alignment = LC_ALIGN
 
-        if is_export:
+        if is_init:
             cell = ws.cell(1, 6, 6)
             cell.fill = VIOLET_FILL
             cell.border = OUTER_BORDER
@@ -306,56 +329,48 @@ class RegisterTable:
 
         for addr in sorted(tuple(self.reg_table.keys())):
             reg_list = self.reg_table[addr]
-            cell_font = GREY_FONT if reg_list[0] == 'H:' else Font()
             is_first = True
 
-            for reg in reg_list[4:]:
+            for reg in reg_list[3:]:
                 cell_fill = YELLOW_FILL if is_first else PatternFill()
 
-                row = ws.row_dimensions[row_ed]
-                row.font = cell_font
-                row.fill = cell_fill
-                row.border = OUTER_BORDER
-                row.alignment = CC_ALIGN
-
                 if is_first:
-                    cell = ws.cell(row_ed, 1, hex(addr))
-                    cell.font = cell_font
-                    cell.fill = cell_fill
-                    cell.border = OUTER_BORDER
-                    cell.alignment = CT_ALIGN
+                    ws.cell(row_ed, 1, hex(addr))
+                    ws.cell(row_ed, 2, reg_list[1])
 
-                    cell = ws.cell(row_ed, 2, reg_list[2])
-                    cell.font = cell_font
-                    cell.fill = cell_fill
-                    cell.border = OUTER_BORDER
-                    cell.alignment = LT_ALIGN
+                cell = ws.cell(row_ed, 1)
+                cell.fill = cell_fill
+                cell.border = OUTER_BORDER
+                cell.alignment = CT_ALIGN
 
-                cell = ws.cell(row_ed, 3, hex(reg[3]))
-                cell.font = cell_font
+                cell = ws.cell(row_ed, 2)
+                cell.fill = cell_fill
+                cell.border = OUTER_BORDER
+                cell.alignment = LT_ALIGN
+
+                cell = ws.cell(row_ed, 3, hex(reg[4]))
                 cell.fill = cell_fill
                 cell.border = OUTER_BORDER
                 cell.alignment = RT_ALIGN
 
-                if reg[1] == reg[2]:
-                    cell = ws.cell(row_ed, 4, str(reg[1]))
+                if reg[2] == reg[3]:
+                    cell = ws.cell(row_ed, 4, str(reg[2]))
                 else:
-                    cell = ws.cell(row_ed, 4, '_'.join([str(reg[1]), str(reg[2])]))
+                    cell = ws.cell(row_ed, 4, '_'.join([str(reg[2]), str(reg[3])]))
 
-                cell.font = cell_font
                 cell.fill = cell_fill
                 cell.border = OUTER_BORDER
                 cell.alignment = RT_ALIGN
+
+                cell_font = GREY_FONT if reg[1] == 'n' else Font()
 
                 if reg[0] == 'RESERVED':
                     cell = ws.cell(row_ed, 5, reg[0].lower())
                 else:
-                    toks = [] if reg[4] is None else reg[4].split(',')
+                    toks = [] if reg[5] is None else reg[5].split(',')
                     members = [reg[0]]
-
                     for tok in toks:
                         members.append(tok.strip())
-
                     cell = ws.cell(row_ed, 5, '\n'.join(members))
 
                 cell.font = cell_font
@@ -363,12 +378,18 @@ class RegisterTable:
                 cell.border = OUTER_BORDER
                 cell.alignment = LT_ALIGN
 
-                if is_export:
-                    cell = ws.cell(row_ed, 6, hex(reg[3]).upper()[2:])
+                if is_init:
+                    cell = ws.cell(row_ed, 6, hex(reg[4]).upper()[2:])
                     cell.font = cell_font
                     cell.fill = cell_fill
                     cell.border = OUTER_BORDER
                     cell.alignment = CC_ALIGN
+
+                row = ws.row_dimensions[row_ed]
+                row.font = cell_font
+                row.fill = cell_fill
+                row.border = OUTER_BORDER
+                row.alignment = CC_ALIGN
 
                 row_ed += 1
                 is_first = False
@@ -400,8 +421,8 @@ class RegisterTable:
         """Show register table""" #{{{
         print(comment)
         for addr, reg_list in self.reg_table.items():
-            print("{}".format([hex(addr)] + reg_list[0:4]))
-            for reg in reg_list[4:]:
+            print("{}".format([hex(addr)] + reg_list[0:3]))
+            for reg in reg_list[3:]:
                 print("  {}".format(reg))
         print()
     #}}}
@@ -414,26 +435,30 @@ def main(is_debug=False):
             usage='%(prog)s [options]',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=textwrap.dedent('''
-                Programming Register Table converter.
-
-                  config text to excel is default mode.
+                Programming register table converter.
                 '''))
 
-    parser.add_argument('-i', dest='is_inverse', action='store_true', 
-                              help='inverse mode (excel to config text)')
-    parser.add_argument('-e', dest='is_export', action='store_true', 
-                              help='export default setting')
-    parser.add_argument('file', help='file name') 
+    parser.add_argument('in_type', help='input type (option: txt/xls)') 
+    parser.add_argument('out_type', help='output type (option: txt/xls)') 
+    parser.add_argument('reg_fn', help='register table in') 
+
+    parser.add_argument('-i', dest='is_init', action='store_true', 
+                              help='create initial pattern')
 
     args = parser.parse_args()
 
-    ## Parser register table & dump
-    if args.is_inverse:
-        pat_list = RegisterTable(args.file, 'xls', is_debug)
-        pat_list.cfg_dump(args.is_export)
+    # Parser register table
+
+    pat_list = RegisterTable(args.reg_fn, args.in_type, is_debug)
+
+    # Dump register table
+
+    if args.out_type == 'txt':
+        pat_list.txt_export(args.is_init)
+    elif args.out_type == 'xls':
+        pat_list.xls_export(args.is_init)
     else:
-        pat_list = RegisterTable(args.file, 'cfg', is_debug)
-        pat_list.xls_dump(args.is_export)
+        raise TypeError("Unsupport output table type ({})".format(args.out_type))
 #}}}
 
 if __name__ == '__main__':
