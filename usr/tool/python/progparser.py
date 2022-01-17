@@ -172,10 +172,15 @@ class PatternList:
             with open(ini_fn, 'r') as f:
                 tmp_fns = f.readlines()
 
-            if start == 0:
+            if start < 1:
                 start = 1
-            if end == 0:
+            elif start > len(tmp_fns):
+                start = len(tmp_fns)
+
+            if end == 0 or end > len(tmp_fns):
                 end = len(tmp_fns)
+            elif end < start:
+                end = start
 
             for i in range(start-1, end):
                 cfg_fns.append(tmp_fns[i].rstrip())
@@ -207,7 +212,7 @@ class PatternList:
             for addr, reg_list in self.reg_table.items():
                 val_list = []
                 for reg in reg_list[3:]:
-                    if reg[1] == 'n'
+                    if reg[1] == 'n':
                         val_list.append(reg[4])
                     else:
                         val_list.append(cfg.get(reg[0], reg[4])) 
@@ -228,10 +233,15 @@ class PatternList:
             with open(hex_fn, 'r') as f:
                 tmp_fns = f.readlines()
 
-            if start == 0:
+            if start < 1:
                 start = 1
-            if end == 0:
+            elif start > len(tmp_fns):
+                start = len(tmp_fns)
+
+            if end == 0 or end > len(tmp_fns):
                 end = len(tmp_fns)
+            elif end < start:
+                end = start
 
             for i in range(start-1, end):
                 cfg_fns.append(tmp_fns[i].rstrip())
@@ -284,12 +294,21 @@ class PatternList:
         ws = wb.worksheets[0]
         
         if is_batch:
-            if start == 0:
+            if start < 6:
                 start = 6
-            if end == 0:
+            elif start > ws.max_column:
+                start = ws.max_column
+
+            if end == 0 or end > ws.max_column:
                 end = ws.max_column
-        else:
+            elif end < start:
+                end = start
+        elif start < 6:
             start = end = 6
+        elif start > ws.max_column:
+            start = end = ws.max_column
+        else:
+            end = start
 
         addr_col = tuple(ws.iter_cols(1, 1, None, None, True))[0]
         name_col = tuple(ws.iter_cols(5, 5, None, None, True))[0]
@@ -303,7 +322,6 @@ class PatternList:
             for i in range(row_st, row_ed):
                 reg_name = name_col[i].split('\n')[0]
                 if reg_name.upper() != 'RESERVED':
-                    # val = self.get_int_val(str(val_col[i]))
                     val = int(str(val_col[i]), 16)
                     cfg[reg_name] = val
 
@@ -332,22 +350,22 @@ class PatternList:
         wb.close()
     #}}}
 
-    def ini_dump(self):
+    def ini_dump(self, pat_out_fn=None):
         """Dump pattern with ini format""" #{{{
-        if os.path.isdir("pat_out"):
-            shutil.rmtree("pat_out")
-        os.mkdir("pat_out")
-
         for pat in self.pat_list:
+            if pat_out_fn is not None:
+                pat_fn = pat_out_fn
+            else:
+                pat_fn = os.path.join("pat_out", pat[0]+".ini")
+
             is_first = True
-            pat_fn = os.path.join("pat_out", pat[0]+".ini")
             with open(pat_fn, 'w') as f:
                 for addr, reg_list in self.reg_table.items():
                     if reg_list[0] is not None:
                         if not is_first:
                             f.write('\n')
                         f.write(f'{reg_list[0]}\n')
-                        is_first = Flase
+                        is_first = False
 
                     for val, reg in zip(pat[1][addr], reg_list[3:]):
                         if reg[1] == 'y':
@@ -359,14 +377,14 @@ class PatternList:
                             is_first = False
     #}}}
 
-    def hex_dump(self):
+    def hex_dump(self, pat_out_fn=None):
         """Dump pattern with hex format""" #{{{
-        if os.path.isdir("pat_out"):
-            shutil.rmtree("pat_out")
-        os.mkdir("pat_out")
-
         for pat in self.pat_list:
-            pat_fn = os.path.join("pat_out", pat[0]+".dat")
+            if pat_out_fn is not None:
+                pat_fn = pat_out_fn
+            else:
+                pat_fn = os.path.join("pat_out", pat[0]+".dat")
+
             with open(pat_fn, 'w') as f:
                 addr_list = sorted(tuple(pat[1].keys()))
                 for addr in range(0, addr_list[-1]+4, 4):
@@ -377,12 +395,8 @@ class PatternList:
                     f.write("{:04x}{:08x}\n".format(addr, word_val))
     #}}}
 
-    def xls_dump(self, reg_fn : str):
+    def xls_dump(self, reg_fn : str, pat_out_fn=None):
         """Dump pattern with excel format""" #{{{
-        if os.path.isdir("pat_out"):
-            shutil.rmtree("pat_out")
-        os.mkdir("pat_out")
-
         wb = openpyxl.load_workbook(reg_fn)
         ws = wb.worksheets[0]
         pat_idx = ws.max_column + 1
@@ -428,7 +442,11 @@ class PatternList:
 
             pat_idx += 1
 
-        wb.save(os.path.join("pat_out", "age_reg.xlsx"))
+        if pat_out_fn is not None:
+            wb.save(pat_out_fn)
+        else:
+            wb.save(os.path.join("pat_out", "age_reg.xlsx"))
+
         wb.close()
     #}}}
 
@@ -472,49 +490,78 @@ def main(is_debug=False):
                   ## config in, hex out, with config format register table.
                 '''))
 
-    parser.add_argument('-t', dest='txt_table_fn', metavar='REG_FN', 
+    parser.add_argument('in_fmt', type=str, help='input format (option: ini/hex/xls)') 
+    parser.add_argument('out_fmt', type=str, help='output format (option: ini/hex/xls)') 
+    parser.add_argument('pat_in_fn', type=str, help='pattern file name') 
+
+    parser.add_argument('-t', dest='txt_table_fn', metavar='reg_fn', type=str, 
                               help='text mode programming table')
-    parser.add_argument('-x', dest='xls_table_fn', metavar='REG_FN', 
+    parser.add_argument('-x', dest='xls_table_fn', metavar='reg_fn', type=str,
                               help='excel mode programming table')
+
     parser.add_argument('-b', dest='is_batch', action='store_true', 
                               help='enable batch mode')
-    parser.add_argument('-s', dest='start_id', metavar='PAT_ID', type=int, default=0,
+    parser.add_argument('-s', dest='start_id', metavar='pat_id', type=int, default=0,
                               help='start pattern ID.')
-    parser.add_argument('-e', dest='end_id', metavar='PAT_ID', type=int, default=0,
+    parser.add_argument('-e', dest='end_id', metavar='pat_id', type=int, default=0,
                               help='end pattern ID')
-    parser.add_argument('in_fmt', help='input format (option: ini/hex/xls)') 
-    parser.add_argument('out_fmt', help='output format (option: ini/hex/xls)') 
-    parser.add_argument('pat_fn', help='pattern file name') 
+    parser.add_argument('-o', dest='pat_out_fn', metavar='pat_out_fn', type=str,
+                              help='output file name (ignore when at batch mode).')
+    parser.add_argument('-O', dest='force_pat_out_fn', metavar='pat_out_fn', type=str,
+                              help='output file name (ignore when at batch mode, force request).')
 
     args = parser.parse_args()
 
     ## Parser register table
+
     pat_list = None
     if args.txt_table_fn is not None:
         pat_list = PatternList(args.txt_table_fn, 'txt', is_debug)
-    elif args.xreg_fn is not None:
+    elif args.xls_table_fn is not None:
         pat_list = PatternList(args.xls_table_fn, 'xls', is_debug)
     else:
         print("[ERR] Register table unexisted (need to set -c or -x).")
         exit(1)
 
     ## Parse input pattern
+
     if args.in_fmt == 'ini':
-        pat_list.ini_parser(args.pat_fn, args.is_batch, args.start_id, args.end_id) 
+        pat_list.ini_parser(args.pat_in_fn, args.is_batch, args.start_id, args.end_id) 
     elif args.in_fmt == 'hex':
-        pat_list.hex_parser(args.pat_fn, args.is_batch, args.start_id, args.end_id)
+        pat_list.hex_parser(args.pat_in_fn, args.is_batch, args.start_id, args.end_id)
     elif args.in_fmt == 'xls':
-        pat_list.xls_parser(args.pat_fn, args.is_batch, args.start_id, args.end_id)
+        pat_list.xls_parser(args.pat_in_fn, args.is_batch, args.start_id, args.end_id)
     else:
         raise TypeError("Unsupport input pattern type ({})".format(args.in_fmt))
 
     ## Dump pattern
+
+    pat_out_fn = None
+    if args.is_batch or (args.force_pat_out_fn is None and args.pat_out_fn is None):
+        if os.path.isfile('pat_out'):
+            os.remove('pat_out')
+        elif os.path.isdir('pat_out'):
+            shutil.rmtree("pat_out")
+        os.mkdir("pat_out")
+    else:
+        if args.force_pat_out_fn is not None:
+            pat_out_fn = args.force_pat_out_fn
+        else:
+            pat_out_fn = args.pat_out_fn
+            if os.path.exists(args.pat_out_fn):
+                ret = input("File existed, overwrite? (y/n) ")
+                if ret.lower() == 'y':
+                    os.remove(pat_out_fn)
+                else:
+                    print('Terminated')
+                    exit(1)
+
     if args.out_fmt == 'ini':
-        pat_list.ini_dump()
+        pat_list.ini_dump(pat_out_fn)
     elif args.out_fmt == 'hex':
-        pat_list.hex_dump()
+        pat_list.hex_dump(pat_out_fn)
     elif args.out_fmt == 'xls':
-        pat_list.xls_dump(args.xls_table_fn)
+        pat_list.xls_dump(args.xls_table_fn, pat_out_fn)
     else:
         raise TypeError("Unsupport output pattern type ({})".format(args.out_fmt))
 #}}}
