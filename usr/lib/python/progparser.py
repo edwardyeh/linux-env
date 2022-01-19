@@ -481,13 +481,33 @@ def main(is_debug=False):
     """Main function""" #{{{
     parser = argparse.ArgumentParser(
             usage='%(prog)s [options]',
-            formatter_class=argparse.RawDescriptionHelpFormatter,
+            formatter_class=argparse.RawTextHelpFormatter,
             description=textwrap.dedent('''
                 Programming Register Parser.
 
-                Examples:
-                  %(prog)s -creg reg_table.txt cfg hex age_reg.pat      
-                  ## config in, hex out, with config format register table.
+                Single-source Examples:
+
+                    @: %(prog)s -t table.txt ini hex reg.ini
+                    
+                        Convert ini to hex by text mode table.
+
+                    @: %(prog)s -x table.xlsx ini xls reg.ini
+
+                        Convert ini to excel by excel mode table.
+
+                Multi-source Examples:
+
+                    @: %(prog)s -t table.txt ini hex <src_list_file> -s 2
+
+                        Single mode, convert an ini choosed in the list.
+
+                    @: %(prog)s -t table.txt ini hex <src_list_file> -b
+
+                        Batch mode, convert all ini in the list.
+
+                    @: %(prog)s -t table.txt ini hex <src_list_file> -b -s 2 -e 5
+
+                        Batch mode, convert ini between start and end in the list.
                 '''))
 
     parser.add_argument('in_fmt', type=str, help='input format (option: ini/hex/xls)') 
@@ -506,9 +526,13 @@ def main(is_debug=False):
     parser.add_argument('-e', dest='end_id', metavar='pat_id', type=int, default=0,
                               help='end pattern ID')
     parser.add_argument('-o', dest='pat_out_fn', metavar='pat_out_fn', type=str,
-                              help='output file name (ignore when at batch mode).')
+                              help=textwrap.dedent('''\
+                                output file name 
+                                (ignore when ini/hex out at batch mode)'''))
     parser.add_argument('-O', dest='force_pat_out_fn', metavar='pat_out_fn', type=str,
-                              help='output file name (ignore when at batch mode, force request).')
+                              help=textwrap.dedent('''\
+                                output file name 
+                                (force overwrite, ignore when ini/hex out at batch mode)'''))
 
     args = parser.parse_args()
 
@@ -537,7 +561,8 @@ def main(is_debug=False):
     ## Dump pattern
 
     pat_out_fn = None
-    if args.is_batch or (args.force_pat_out_fn is None and args.pat_out_fn is None):
+    if (args.is_batch and args.out_fmt != 'xls') or \
+       (args.force_pat_out_fn is None and args.pat_out_fn is None):
         if os.path.isfile('pat_out'):
             os.remove('pat_out')
         elif os.path.isdir('pat_out'):
