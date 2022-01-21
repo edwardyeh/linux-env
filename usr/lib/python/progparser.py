@@ -522,8 +522,8 @@ def main(is_debug=False):
 
                         Batch mode, convert settings from the 6th column to 8th column in the excel table.
 
-                Convert between ini/hex with any format of reference table is permitted, but convert from
-                for to excel format by excel-style reference table is necessary.
+                Convert between ini/hex with any format of reference table is permitted, but convert
+                from/to excel format by excel-style reference table is necessary.
                 '''))
 
     parser.add_argument('in_fmt', metavar='format_in', type=str, 
@@ -534,14 +534,14 @@ def main(is_debug=False):
                                     help='input pattern path') 
 
     parser.add_argument('-t', dest='txt_table_fp', metavar='<path>', type=str, 
-                                help='text-style reference table')
+                                help='use text-style reference table')
     parser.add_argument('-x', dest='xls_table_fp', metavar='<path>', type=str,
                                 help=textwrap.dedent('''\
-                                excel-style reference table 
+                                use excel-style reference table 
                                 (copy current table when excel out)'''))
     parser.add_argument('-X', dest='xls_table_fp2', metavar='<path>', type=str,
                                 help=textwrap.dedent('''\
-                                excel-style reference table 
+                                use excel-style reference table 
                                 (create new table when excel out)'''))
     parser.add_argument('-b', dest='is_batch', action='store_true', 
                                 help='enable batch mode')
