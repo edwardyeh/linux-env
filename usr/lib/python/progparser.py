@@ -380,7 +380,7 @@ class PatternList:
             if pat_out_fp is not None:
                 pat_fp = pat_out_fp
             else:
-                pat_fp = os.path.join('progp_out', pat[0]+'.dat')
+                pat_fp = os.path.join('progp_out', pat[0]+'.pat')
 
             with open(pat_fp, 'w') as f:
                 addr_list = sorted(tuple(pat[1].keys()))
