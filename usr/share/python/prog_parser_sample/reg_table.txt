@@ -19,6 +19,21 @@ reserved                n   31  0   0x0
 A: 0x40     "IP Version"
 ip_version              n   31  0   0x0
 
+T: [Status]
+
+I: 0x24
+reg_set1_var4           y   24  16  0x1
+
+I: 0x28
+reg_set2_var1           y   15  8   0x2
+reg_set2_var3           n   31  24  0x3
+
+A: 0x30
+reg_set3_var1           y   31  0   0x0
+
+I: 0x24
+reg_set1_var2           y   7   4   0x4
+
 T: [SRC1]
                                 
 A: 0x18     "SRC1_Control0_Register"                         
@@ -59,3 +74,13 @@ src1_alpha_1bit_en              y   14  14  0x0
 src1_fix_color_0_by_alpha_en    y   15  15  0x0
 src1_const_alpha                y   23  16  0x0
 src1_const_alpha_0              y   31  24  0x0
+
+T: [REG_SET1]
+
+A: 0x24
+reg_set1_var1   y   3   0   0x10
+reg_set1_var3   y   15  8   0x11
+
+A: 0x28
+reg_set2_var2   y   23  16  0x12
+reg_set2_var0   y   7   0   0x13
