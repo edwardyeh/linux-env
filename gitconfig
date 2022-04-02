@@ -34,3 +34,5 @@
 [color]
     #status = always
     #ui = always
+[init]
+	defaultBranch = main
