@@ -1,0 +1,68 @@
+#! /bin/bash -f
+
+passportname="Yeh, Hsin-Hsien"
+author="Edward Yeh"
+email="yhh76227@gmail.com"
+year=$(date +%Y)
+copyright="Copyright (C) $year $passportname <$email>"
+
+if [ "$#" -lt 2 ] || \
+   [ "$1" != "c" -a "$1" != "h" -a \
+     "$1" != "v" -a "$1" != "t" -a "$1" != "f" -a \
+     "$1" != "cs" -a "$1" != "bs" -a "$1" != "py" -a \
+     "$1" != "d" ]; then
+
+    [ "$#" -ge 3 -a "$3" == "-test" ] && exit 1
+
+    prog=$(basename $0)
+
+    if !([ "$#" -ge 1 -a "$1" == "-list" ]) then
+        echo "Usage: $prog <format> <filename>"
+    fi
+
+    echo ""
+    echo "  format:  c   -- C/C++            "
+    echo "           h   -- Header file      "
+    echo "           v   -- Verilog          "
+    echo "           t   -- Verilog testbench"
+    echo "           f   -- Verilog file list"
+    echo "           cs  -- C shell script   "
+    echo "           bs  -- Bash shell script"
+    echo "           py  -- Python script    "
+    echo "           d   -- Document         "
+    echo ""
+    exit 1
+fi
+
+[ "$#" -ge 3 -a "$3" == "-test" ] && exit 0
+
+if [ "$1" == "c" -o "$1" == "h" -o \
+     "$1" == "v" -o "$1" == "t" -o "$1" == "f" ]; then
+    echo "// SPDX-License-Identifier: {license}"
+    echo "/*"
+    echo " * {one line description}"
+    echo " *"
+    echo " * $copyright"
+    echo " *"
+    echo " * {comment}"
+    echo " */"
+elif [ "$1" == "cs" -o "$1" == "bs" -o "$1" == "py" ]; then
+    echo "# SPDX-License-Identifier: {license}"
+    echo "#"
+    echo "# {one line description}"
+    echo "#"
+    echo "# $copyright"
+    echo "#"
+    echo "# {comment}"
+    echo "#"
+elif [ "$1" == "d" ]; then
+    echo "// SPDX-License-Identifier: {license}"
+    echo "//"
+    echo "// {one line description}"
+    echo "//"
+    echo "// $copyright"
+    echo "//"
+    echo "// {comment}"
+    echo "//"
+fi
+

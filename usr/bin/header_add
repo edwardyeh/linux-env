@@ -2,33 +2,42 @@
 
 function usage() {
     prog=$(basename $0)
-    echo "Usage: $prog <format> <filename_list>"
+    echo "Usage: $prog <license_type> <format> <filename_list>"
     header_gen -list
 }
 
-if [ "$#" -lt 2 ]; then 
+if [ "$#" -lt 3 ]; then 
     usage $0 
     exit 1
 fi
 
-header_gen $1 chk.txt -test
+license_type="$1"
+format="$2"
+
+if [ "$license_type" == "p" ]; then
+    license_gen="header_gen"
+else
+    license_gen="header_gen_os"
+fi
+
+$license_gen $format chk.txt -test
 
 if [ "$?" -ne 0 ]; then
     usage $0  
     exit 1
 fi
 
-for i in $(seq 2 1 $#); do
+for i in $(seq 3 1 $#); do
     eval filename=$(echo \${${i}})
-    if [ "$1" == "bs" -o "$1" == "cs" ]; then
-        sed -n '1p' $filename   >  tmp.file
-        header_gen $1 $filename >> tmp.file
-        echo ""                 >> tmp.file
-        sed -n '2,$p' $filename >> tmp.file
+    if [ "$format" == "bs" -o "$format" == "cs" ]; then
+        sed -n '1p' $filename          >  tmp.file
+        $license_gen $format $filename >> tmp.file
+        echo ""                        >> tmp.file
+        sed -n '2,$p' $filename        >> tmp.file
     else
-        header_gen $1 $filename >  tmp.file
-        echo ""                 >> tmp.file
-        cat $filename           >> tmp.file
+        $license_gen $format $filename >  tmp.file
+        echo ""                        >> tmp.file
+        cat $filename                  >> tmp.file
     fi
 
     mv tmp.file $filename

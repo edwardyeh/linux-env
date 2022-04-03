@@ -6,37 +6,49 @@
 
 function usage() {
     prog=$(basename $0)
-    echo "Usage: $prog <format> <filename> [force_replace]"
+    echo "Usage: $prog <license_type> <format> <filename> [force_replace]"
     header_gen -list
 
+    echo "  license_type:  p  -- private license"
+    echo "                 o  -- open-source license"
     echo "  force_replace: y  -- force replace    "
     echo "                 n  -- process terminate"
     echo ""
 }
 
-if [ "$#" -lt 2 -o "$#" -gt 3 ]; then
+if [ "$#" -lt 3 -o "$#" -gt 4 ]; then
     usage $0
     exit 1
 fi
 
-header_gen $1 $2 -test
+license_type="$1"
+format="$2"
+filename="$3"
+
+if [ "$license_type" == "p" ]; then
+    license_gen="header_gen"
+else
+    license_gen="header_gen_os"
+fi
+
+$license_gen $format $filename -test
 
 if [ "$?" -ne 0 ]; then 
     usage $0 
     exit 1 
 fi
 
-if [ -f "$2" ]; then
+if [ -f "$filename" ]; then
     ans=
 
-    if [ "$#" -eq 3 ]; then
-        ans="$3"
+    if [ "$#" -eq 4 ]; then
+        ans="$4"
     else
         read -p "File exist, replace? (y/n) " ans
     fi
 
     if [ "$ans" == "Y" -o "$ans" == "y" ]; then
-        \rm -rf $2
+        \rm -rf $filename
     else
         echo "Process terminate"
         exit
@@ -46,151 +58,151 @@ fi
 # ------------------------------------------------------------
 # --- Pre-Process
 # ------------------------------------------------------------
-if [ "$1" == "bs" ]; then
-    echo '#!/bin/bash' > $2
-    header_gen $1 $2 >> $2
-    echo '' >> $2
-    echo 'alias acalc='"'"'function func { awk "BEGIN{ print $* }"; }; func'"'" >> $2
-    echo '' >> $2
-    chmod +x $2
-elif [ "$1" == "cs" ]; then
-    echo '#!/bin/csh' > $2
-    header_gen $1 $2 >> $2
-    echo '' >> $2
-    echo 'alias acalc '"'"'awk "BEGIN{ print \!* }"'"'" >> $2
-    echo 'alias "bash -c '"'"'echo "'"'"'$RANDOM'"'"'"'"'"'"' >> $2
-    echo '' >> $2
-    chmod +x $2
-elif [ "$1" == "py" ]; then
-    echo '#!/usr/bin/env python3'   > $2
-    echo '# -*- coding: utf-8 -*-' >> $2
-    header_gen $1 $2 >> $2
-    echo '' >> $2
-    chmod +x $2
+if [ "$format" == "bs" ]; then
+    echo '#!/bin/bash' > $filename
+    $license_gen $format $filename >> $filename
+    echo '' >> $filename
+    echo 'alias acalc='"'"'function func { awk "BEGIN{ print $* }"; }; func'"'" >> $filename
+    echo '' >> $filename
+    chmod +x $filename
+elif [ "$format" == "cs" ]; then
+    echo '#!/bin/csh' > $filename
+    $license_gen $format $filename >> $filename
+    echo '' >> $filename
+    echo 'alias acalc '"'"'awk "BEGIN{ print \!* }"'"'" >> $filename
+    echo 'alias "bash -c '"'"'echo "'"'"'$RANDOM'"'"'"'"'"'"' >> $filename
+    echo '' >> $filename
+    chmod +x $filename
+elif [ "$format" == "py" ]; then
+    echo '#!/usr/bin/env python3'   > $filename
+    echo '# -*- coding: utf-8 -*-' >> $filename
+    $license_gen $format $filename >> $filename
+    echo '' >> $filename
+    chmod +x $filename
 else
-    header_gen $1 $2 >> $2
-    echo '' >> $2
+    $license_gen $format $filename >> $filename
+    echo '' >> $filename
 fi
 
 # ------------------------------------------------------------
 # --- Post-Process
 # ------------------------------------------------------------
 
-if [ "$1" == "v" ]; then
+if [ "$format" == "v" ]; then
     org=""
-    module_name=$(echo $2 | sed 's/\.v//g')
+    module_name=$(echo $filename | sed 's/\.v//g')
 
-    echo "module $module_name ();"                                        >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Parameter'                                                >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Input'                                                    >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Output'                                                   >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo "//${org}ss_protect"                                             >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Register'                                                 >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Wire'                                                     >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Circuit'                                                  >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo "//${org}ss_endprotect"                                          >> $2
-    echo ''                                                               >> $2
-    echo 'endmodule'                                                      >> $2
+    echo "module $module_name ();"                                        >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Parameter'                                                >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Input'                                                    >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Output'                                                   >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo "//${org}ss_protect"                                             >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Register'                                                 >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Wire'                                                     >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Circuit'                                                  >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo "//${org}ss_endprotect"                                          >> $filename
+    echo ''                                                               >> $filename
+    echo 'endmodule'                                                      >> $filename
 
-elif [ "$1" == "t" ]; then
-    module_name=$(echo $2 | sed 's/\.v//g')
+elif [ "$format" == "t" ]; then
+    module_name=$(echo $filename | sed 's/\.v//g')
 
-    echo "moudle $module_name;"                                           >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Parameter'                                                >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Signal'                                                   >> $2
-    echo '//============================================================' >> $2
-    echo '//{{{'                                                          >> $2
-    echo '//}}}'                                                          >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Description'                                              >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Task'                                                     >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Circuit'                                                  >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Monitor'                                                  >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Waveform Dump'                                            >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo 'endmodule'                                                      >> $2
+    echo "moudle $module_name;"                                           >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Parameter'                                                >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Signal'                                                   >> $filename
+    echo '//============================================================' >> $filename
+    echo '//{{{'                                                          >> $filename
+    echo '//}}}'                                                          >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Description'                                              >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Task'                                                     >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Circuit'                                                  >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Monitor'                                                  >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Waveform Dump'                                            >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo 'endmodule'                                                      >> $filename
 
-elif [ "$1" == "f" ]; then
-    echo '//============================================================' >> $2
-    echo '//--- Include Path'                                             >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Define'                                                   >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Library'                                                  >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- DesignWare'                                               >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Testbench'                                                >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Monitor'                                                  >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
-    echo '//============================================================' >> $2
-    echo '//--- Design'                                                   >> $2
-    echo '//============================================================' >> $2
-    echo ''                                                               >> $2
+elif [ "$format" == "f" ]; then
+    echo '//============================================================' >> $filename
+    echo '//--- Include Path'                                             >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Define'                                                   >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Library'                                                  >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- DesignWare'                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Testbench'                                                >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Monitor'                                                  >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
+    echo '//============================================================' >> $filename
+    echo '//--- Design'                                                   >> $filename
+    echo '//============================================================' >> $filename
+    echo ''                                                               >> $filename
 
 fi
         
