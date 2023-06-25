@@ -20,48 +20,65 @@ if [ "$#" -lt 2 ]; then
     echo ""
     echo "Options:"
     echo ""
-    echo "  -v      Create for a verilog project."
+    echo "  v       Create for a verilog project."
+    echo "  py      Create for a python project."
     echo ""
     exit
 fi
 
-tmux has-session -t $2 &> /dev/null
+proj_type=$1
+ses_name=$2
 
-if [ $? -eq 0 ]; then
-    echo "This session is exist."
-elif [ $1 == "-v" ]; then
-    tmux new-session -s $2 -n c-model -d
-
+function sync_env_var() {
     if [ `basename $SHELL` == "bash" ]; then
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
             if [ -z `echo $var | egrep '\(|\)'` ]; then
                 eval val=\$$var
-                tmux send-key -t $2 "tmux setenv $var '$val'" C-m
-                tmux send-key -t $2 "export $var='$val'" C-m
+                tmux send-key -t $1 "tmux setenv $var '$val'" C-m
+                tmux send-key -t $1 "export $var='$val'" C-m
             fi
         done
     else
         for var in `env | awk 'BEGIN {FS="="} {print $1}'`; do
             if [ -z `echo $var | egrep '\(|\)'` ]; then
                 eval val=\$$var
-                tmux send-key -t $2 "tmux setenv $var '$val'" C-m
-                tmux send-key -t $2 "setenv $var '$val'" C-m
+                tmux send-key -t $1 "tmux setenv $var '$val'" C-m
+                tmux send-key -t $1 "setenv $var '$val'" C-m
             fi
         done
     fi
+}
 
-    tmux send-key -t $2 "clear" C-m
+tmux has-session -t $ses_name &> /dev/null
+
+if [ $? -eq 0 ]; then
+    echo "This session is exist."
+elif [ $proj_type == "v" ]; then
+    tmux new-session -s $ses_name -n c-model -d
+    sync_env_var $ses_name
+    tmux send-key -t $ses_name "clear" C-m
 
     sleep 1
 
-    tmux new-window -n hdl   -t $2
-    tmux new-window -n tb    -t $2
-    tmux new-window -n lib   -t $2
-    tmux new-window -n sim   -t $2
-    tmux new-window -n syn   -t $2
-    tmux new-window -n tool  -t $2
-    tmux new-window -n repo  -t $2
-    tmux a -t $2
+    tmux new-window -n hdl   -t $ses_name
+    tmux new-window -n tb    -t $ses_name
+    tmux new-window -n lib   -t $ses_name
+    tmux new-window -n sim   -t $ses_name
+    tmux new-window -n syn   -t $ses_name
+    tmux new-window -n tool  -t $ses_name
+    tmux new-window -n repo  -t $ses_name
+    tmux a -t $ses_name
+elif [ $proj_type == "py" ]; then
+    tmux new-session -s $ses_name -n code -d
+    sync_env_var $ses_name
+    tmux send-key -t $ses_name "clear" C-m
+
+    sleep 1
+
+    tmux new-window -n test -t $ses_name
+    tmux new-window -n ref  -t $ses_name
+    tmux new-window -n repo -t $ses_name
+    tmux a -t $ses_name
 else
     echo "Error project type."
 fi

@@ -135,6 +135,9 @@ alias find_empty='find -name ".git" -prune -o -type d -empty -print'
 alias add-cflags='function func { export CFLAGS="-I$* ${CFLAGS}"; }; func'
 alias add-ldflags='function func { export LDFLAGS="-L$* -Wl,--rpath=$* ${LDFLAGS}"; }; func'
 alias vim-swap='find ~/.vim/swap -name "%*" | xargs -i basename {} | sed "s/\%/\//g; s/\.swp$//g"'
+alias rp='realpath'
+alias set_proot='export proot=$(realpath .)'
+alias set_ret='export ret=$(realpath .)'
 
 ## ------------------------------------------------------
 #    Gnome alias
@@ -147,6 +150,8 @@ alias rdp-edward-nb-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:edward-nb /sou
 alias rdp-dell-da310-1610="xfreerdp /u:edward /size:$RDP_HD1610 /v:dell-da310 /sound /microphone"
 alias rdp-dell-da310-1609="xfreerdp /u:edward /size:$RDP_HD1609 /v:dell-da310 /sound /microphone"
 alias rdp-dell-da310-multi="xfreerdp /u:edward /v:dell-da310 /multimon /sound /microphone"
+alias rdp-edward-nb-multi="xfreerdp /u:edward /v:edward-nb /multimon /sound /microphone"
+alias rdp-edward-nb2-multi="xfreerdp /u:edward /v:edward-nb2 /multimon /sound /microphone"
 
 ## ------------------------------------------------------
 #    MINGW/MSYS Setting

@@ -2,7 +2,7 @@
 	name = Edward Yeh
 	email = yhh76227@gmail.com
 [core]
-	editor = gvim -f
+	editor = vim -f
     whitespace = trailing-space
     quotepath = false
 [diff]

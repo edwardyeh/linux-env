@@ -27,8 +27,11 @@ filename="$3"
 
 if [ "$license_type" == "p" ]; then
     license_gen="header_gen"
-else
+elif [ "$license_type" == "o" ]; then
     license_gen="header_gen_os"
+else
+    echo "Unknown license type, terminate."
+    exit 1 
 fi
 
 $license_gen $format $filename -test
@@ -50,8 +53,8 @@ if [ -f "$filename" ]; then
     if [ "$ans" == "Y" -o "$ans" == "y" ]; then
         \rm -rf $filename
     else
-        echo "Process terminate"
-        exit
+        echo "Process terminate."
+        exit 1
     fi
 fi
 
