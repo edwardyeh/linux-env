@@ -138,6 +138,7 @@ alias vim-swap='find ~/.vim/swap -name "%*" | xargs -i basename {} | sed "s/\%/\
 alias rp='realpath'
 alias set_proot='export proot=$(realpath .)'
 alias set_ret='export ret=$(realpath .)'
+alias WS="cd $HOME/Workspace"
 
 ## ------------------------------------------------------
 #    Gnome alias

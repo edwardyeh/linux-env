@@ -6,7 +6,7 @@
 
 function usage() {
     prog=$(basename $0)
-    echo "Usage: $prog <license_type> <format> <filename> [force_replace]"
+    echo "Usage: $prog <format> <license_type> <filename> [force_replace]"
     header_gen -list
 
     echo "  license_type:  p  -- private license"
@@ -21,8 +21,8 @@ if [ "$#" -lt 3 -o "$#" -gt 4 ]; then
     exit 1
 fi
 
-license_type="$1"
-format="$2"
+format="$1"
+license_type="$2"
 filename="$3"
 
 if [ "$license_type" == "p" ]; then
